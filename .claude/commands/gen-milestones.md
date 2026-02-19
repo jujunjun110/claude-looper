@@ -2,7 +2,7 @@
 
 ## やること
 
-以下のドキュメントを読み、プロジェクトを完成させるための Milestone 一覧を設計する。
+以下のドキュメントを読み、プロジェクトの Milestone 一覧を設計する。
 各 Milestone のゴール（何が動く状態になるか）を定義する。
 Task の細分化は Milestone 着手時に計画セッションが行うため、ここでは Milestone レベルの設計のみ行う。
 
@@ -10,9 +10,20 @@ Task の細分化は Milestone 着手時に計画セッションが行うため�
 2. docs/ 配下の関連ドキュメントを読む
 3. CLAUDE.md を読む
 4. 既存コードがあれば Glob/Grep で現状を把握する
-5. Milestone を設計する
-6. looper/milestones.json を出力する
-7. git add looper/milestones.json && git commit -m "chore: generate milestones"
+5. 既存の looper/milestones.json があればアーカイブする（後述）
+6. Milestone を設計する
+7. looper/milestones.json を出力する
+8. git add looper/milestones*.json && git commit -m "chore: generate milestones"
+
+## アーカイブ
+
+looper/milestones.json が既に存在する場合、新しい milestones.json を生成する前にリネームしてアーカイブする:
+
+```bash
+mv looper/milestones.json "looper/milestones.$(date +%Y%m%d_%H%M%S).json"
+```
+
+これにより過去の Milestone 履歴が保持される。アーカイブ済みファイルは run.sh からは参照されない。
 
 ## 出力フォーマット
 
