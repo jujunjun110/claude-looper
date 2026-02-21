@@ -243,7 +243,7 @@
         "id": "knowledge-ui",
         "description": "shadcn/ui コンポーネント追加（Textarea, ScrollArea 等が未追加なら追加）。src/components/knowledge/knowledge-article-table.tsx（'use client'、一覧テーブル: タイトル・ソース種別・作成日・操作ボタン）、knowledge-article-form-dialog.tsx（'use client'、新規登録/編集兼用の Dialog フォーム: title, content, sourceUrl 入力 → Server Action 呼び出し）、delete-knowledge-article-button.tsx（'use client'、削除確認付きボタン → Server Action 呼び出し）を作成。src/app/(app)/knowledge/page.tsx を更新し、loadKnowledgeArticles() で一覧取得 → KnowledgeArticleTable に props 渡し + 新規登録ボタン配置。e2e/knowledge.spec.ts に /knowledge ページの E2E テスト（一覧表示・新規登録→一覧反映・編集・削除の基本シナリオ）を追加",
         "wave": 5,
-        "done": false
+        "done": true
       },
       {
         "id": "verify-milestone4",

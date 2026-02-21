@@ -41,6 +41,17 @@ project-root/
 - 環境ごとに Supabase プロジェクトを分離（dev / prod）
 - ORM 型 ↔ ドメインモデル変換は infrastructure 層が担当（`architecture.md` 参照）
 
+### ローカル開発環境
+
+開発中は **Supabase CLI によるローカル Supabase** を使用する。クラウドの Supabase は使わない。
+
+```bash
+supabase start          # ローカル Supabase 起動（Docker）
+prisma db push          # スキーマをローカル DB に反映
+```
+
+`supabase start` で起動すると、接続情報（DB URL, API URL, anon key 等）が表示される。これを `.env` に設定する。`ANTHROPIC_API_KEY` と `OPENAI_API_KEY` はローカルの `.env` に既に存在する。
+
 ---
 
 ## 認証

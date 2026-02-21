@@ -425,6 +425,12 @@ interface EmbeddingGateway {
 
 ---
 
+## 環境変数
+
+`ANTHROPIC_API_KEY` と `OPENAI_API_KEY` はローカルの `.env` に存在するので、そのまま利用すること。新たに取得・設定する必要はない。
+
+---
+
 ## ディレクトリ構成（主要部分）
 
 ```
