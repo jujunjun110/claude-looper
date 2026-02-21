@@ -16,7 +16,9 @@
       "Bash(pnpm --filter content-reviewer lint:fix:*)",
       "Bash(PGPASSWORD=postgres psql:*)",
       "Bash(docker exec:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
