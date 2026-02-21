@@ -1,0 +1,11 @@
+{
+	"name": "content-reviewer-monorepo",
+	"private": true,
+	"scripts": {
+		"lint": "pnpm -r run lint",
+		"typecheck": "pnpm -r run typecheck",
+		"build": "pnpm -r run build",
+		"verify": "pnpm lint && pnpm typecheck && pnpm build"
+	},
+	"packageManager": "pnpm@9.15.4"
+}
