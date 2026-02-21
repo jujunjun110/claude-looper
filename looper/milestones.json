@@ -53,7 +53,7 @@
         "id": "auth-deps-and-test-setup",
         "description": "apps/content-reviewer/package.json に @supabase/supabase-js, @supabase/ssr, vitest を追加し pnpm install を実行。apps/content-reviewer/vitest.config.ts を作成（src/ 配下のテストを対象、パスエイリアス @/ を設定）。apps/content-reviewer/package.json に test script（vitest run）を追加。ルート package.json に test script（pnpm -r run test）を追加",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "auth-contracts",

@@ -60,6 +60,21 @@ git worktree remove /tmp/ralph-worktrees/{task-id} --force
 - それ以降の画面遷移は UI 上のクリック操作で行うこと（URL の直接アクセスは禁止）
 - 期待通りに動作しない場合は、ステップ5の「チェック失敗した場合」と同様に fix タスクを追加する
 
+### UI 動画の録画（動作確認が全て成功した場合のみ）
+
+動作確認が全て成功したら、録画モードで同じ操作を再実行し、動画を `looper/output/` に保存する。
+**失敗時は録画しない。** 成功を確認してから録画する。
+
+手順:
+
+1. タイムスタンプを取得する:
+   ```bash
+   TIMESTAMP=$(TZ=Asia/Tokyo date +%Y%m%d_%H%M%S)
+   ```
+2. Playwright MCP の `browser_start_recording` で録画を開始する
+3. 成功した動作確認と同じ操作を再実行する
+4. Playwright MCP の `browser_save_recording` で `looper/output/${TIMESTAMP}_milestone__MILESTONE__.webm` に保存する
+
 ## ステップ4: `pnpm verify` の改善
 
 検証結果に関わらず、毎回以下を考える:
