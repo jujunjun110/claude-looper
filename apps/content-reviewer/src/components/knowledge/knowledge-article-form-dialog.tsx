@@ -1,8 +1,8 @@
 'use client';
 
-import type { KnowledgeArticle } from '@/backend/contexts/knowledge/domain/models/knowledge-article.model';
 import { createKnowledgeArticleAction } from '@/backend/contexts/knowledge/presentation/actions/create-knowledge-article.action';
 import { updateKnowledgeArticleAction } from '@/backend/contexts/knowledge/presentation/actions/update-knowledge-article.action';
+import type { KnowledgeArticleDTO } from '@/backend/contexts/knowledge/presentation/loaders/knowledge-articles.loader';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -19,7 +19,7 @@ import { Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 interface KnowledgeArticleFormDialogProps {
-	article?: KnowledgeArticle;
+	article?: KnowledgeArticleDTO;
 }
 
 export function KnowledgeArticleFormDialog({ article }: KnowledgeArticleFormDialogProps) {
@@ -49,7 +49,7 @@ export function KnowledgeArticleFormDialog({ article }: KnowledgeArticleFormDial
 		try {
 			const formData = new FormData();
 			if (isEdit && article) {
-				formData.append('id', article.id as string);
+				formData.append('id', article.id);
 				formData.append('title', title);
 				formData.append('content', content);
 				await updateKnowledgeArticleAction(formData);

@@ -4,7 +4,7 @@ import { createCreateKnowledgeArticleUseCase } from '@/backend/contexts/knowledg
 import { createUserId } from '@/backend/contexts/shared/domain/models/user-id.model';
 import { revalidatePath } from 'next/cache';
 
-const DUMMY_USER_ID = 'dummy-user-id';
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export async function createKnowledgeArticleAction(formData: FormData): Promise<void> {
 	const title = formData.get('title');

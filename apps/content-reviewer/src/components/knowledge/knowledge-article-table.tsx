@@ -53,10 +53,7 @@ export function KnowledgeArticleTable({ articles }: KnowledgeArticleTableProps) 
 						<TableCell className="text-right">
 							<div className="flex items-center justify-end gap-2">
 								<KnowledgeArticleFormDialog article={article} />
-								<DeleteKnowledgeArticleButton
-									articleId={article.id}
-									title={article.title}
-								/>
+								<DeleteKnowledgeArticleButton articleId={article.id} title={article.title} />
 							</div>
 						</TableCell>
 					</TableRow>

@@ -59,7 +59,7 @@ test.describe('/rules ページ', () => {
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
 		// 登録したルールが一覧に表示される
-		await expect(page.getByText(ngExpression)).toBeVisible();
+		await expect(page.locator('tbody').getByText(ngExpression)).toBeVisible();
 	});
 
 	test('ルールを編集できる', async ({ page }) => {
@@ -75,10 +75,10 @@ test.describe('/rules ページ', () => {
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
 		// 登録完了を待つ
-		await expect(page.getByText(ngExpression)).toBeVisible();
+		await expect(page.locator('tbody').getByText(ngExpression)).toBeVisible();
 
 		// 編集ボタンをクリック（登録したルールの行）
-		const ruleRow = page.locator(`text=${ngExpression}`).locator('..');
+		const ruleRow = page.locator('tbody tr', { hasText: ngExpression });
 		await ruleRow.getByRole('button', { name: /編集/ }).click();
 
 		// 推奨表現を更新
@@ -88,7 +88,7 @@ test.describe('/rules ページ', () => {
 		await page.getByRole('button', { name: /保存|更新/ }).click();
 
 		// 更新内容が反映されている
-		await expect(page.getByText('更新後推奨表現')).toBeVisible();
+		await expect(page.locator('tbody').getByText('更新後推奨表現')).toBeVisible();
 	});
 
 	test('ルールを削除できる', async ({ page }) => {
@@ -104,19 +104,16 @@ test.describe('/rules ページ', () => {
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
 		// 登録完了を待つ
-		await expect(page.getByText(ngExpression)).toBeVisible();
+		await expect(page.locator('tbody').getByText(ngExpression)).toBeVisible();
 
 		// 削除ボタンをクリック
-		const ruleRow = page.locator(`text=${ngExpression}`).locator('..');
+		const ruleRow = page.locator('tbody tr', { hasText: ngExpression });
 		await ruleRow.getByRole('button', { name: /削除/ }).click();
 
-		// 確認ダイアログがある場合は確認
-		const confirmButton = page.getByRole('button', { name: /確認|はい|削除する/ });
-		if (await confirmButton.isVisible()) {
-			await confirmButton.click();
-		}
+		// 確認ダイアログの削除ボタンをクリック
+		await page.getByRole('button', { name: /削除/ }).last().click();
 
-		// 削除されて一覧から消えている
-		await expect(page.getByText(ngExpression)).not.toBeVisible();
+		// 削除されて一覧テーブルから消えている
+		await expect(page.locator('tbody').getByText(ngExpression)).not.toBeVisible({ timeout: 15000 });
 	});
 });

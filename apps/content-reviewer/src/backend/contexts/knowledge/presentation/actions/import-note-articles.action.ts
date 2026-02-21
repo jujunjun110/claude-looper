@@ -4,7 +4,7 @@ import { createImportNoteArticlesUseCase } from '@/backend/contexts/knowledge/pr
 import { createUserId } from '@/backend/contexts/shared/domain/models/user-id.model';
 import { revalidatePath } from 'next/cache';
 
-const DUMMY_USER_ID = 'dummy-user-id';
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export async function importNoteArticlesAction(formData: FormData): Promise<void> {
 	const selectedUrlsRaw = formData.getAll('selectedUrls');

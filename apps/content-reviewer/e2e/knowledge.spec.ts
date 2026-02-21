@@ -45,6 +45,9 @@ test.describe('/knowledge ページ', () => {
 	});
 
 	test('ナレッジ記事を新規登録すると一覧に表示される', async ({ page }) => {
+		// OpenAI embedding 生成に時間がかかるためタイムアウトを延長
+		test.setTimeout(60000);
+
 		// 新規登録ボタンをクリック
 		const addButton = page
 			.getByRole('button', { name: /新規登録|記事を追加|追加/ })
@@ -59,11 +62,13 @@ test.describe('/knowledge ページ', () => {
 		// 送信ボタンをクリック
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
-		// 登録した記事が一覧に表示される
-		await expect(page.getByText(articleTitle)).toBeVisible();
+		// 登録した記事が一覧に表示される（embedding 生成があるため長めに待つ）
+		await expect(page.locator('tbody').getByText(articleTitle)).toBeVisible({ timeout: 30000 });
 	});
 
 	test('ナレッジ記事を編集できる', async ({ page }) => {
+		test.setTimeout(60000);
+
 		// まず1件登録する
 		const addButton = page
 			.getByRole('button', { name: /新規登録|記事を追加|追加/ })
@@ -76,10 +81,10 @@ test.describe('/knowledge ページ', () => {
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
 		// 登録完了を待つ
-		await expect(page.getByText(articleTitle)).toBeVisible();
+		await expect(page.locator('tbody').getByText(articleTitle)).toBeVisible({ timeout: 30000 });
 
 		// 編集ボタンをクリック（登録した記事の行）
-		const articleRow = page.locator(`text=${articleTitle}`).locator('..');
+		const articleRow = page.locator('tbody tr', { hasText: articleTitle });
 		await articleRow.getByRole('button', { name: /編集/ }).click();
 
 		// 内容を更新
@@ -89,10 +94,12 @@ test.describe('/knowledge ページ', () => {
 		await page.getByRole('button', { name: /保存|更新/ }).click();
 
 		// 更新内容が反映されている（タイトルは変わらず表示）
-		await expect(page.getByText(articleTitle)).toBeVisible();
+		await expect(page.locator('tbody').getByText(articleTitle)).toBeVisible({ timeout: 15000 });
 	});
 
 	test('ナレッジ記事を削除できる', async ({ page }) => {
+		test.setTimeout(60000);
+
 		// まず1件登録する
 		const addButton = page
 			.getByRole('button', { name: /新規登録|記事を追加|追加/ })
@@ -105,19 +112,16 @@ test.describe('/knowledge ページ', () => {
 		await page.getByRole('button', { name: /保存|登録|作成/ }).click();
 
 		// 登録完了を待つ
-		await expect(page.getByText(articleTitle)).toBeVisible();
+		await expect(page.locator('tbody').getByText(articleTitle)).toBeVisible({ timeout: 30000 });
 
 		// 削除ボタンをクリック
-		const articleRow = page.locator(`text=${articleTitle}`).locator('..');
+		const articleRow = page.locator('tbody tr', { hasText: articleTitle });
 		await articleRow.getByRole('button', { name: /削除/ }).click();
 
-		// 確認ダイアログがある場合は確認
-		const confirmButton = page.getByRole('button', { name: /確認|はい|削除する|削除/ }).last();
-		if (await confirmButton.isVisible()) {
-			await confirmButton.click();
-		}
+		// 確認ダイアログの削除ボタンをクリック
+		await page.getByRole('button', { name: /削除/ }).last().click();
 
-		// 削除されて一覧から消えている
-		await expect(page.getByText(articleTitle)).not.toBeVisible();
+		// 削除されて一覧テーブルから消えている
+		await expect(page.locator('tbody').getByText(articleTitle)).not.toBeVisible({ timeout: 15000 });
 	});
 });

@@ -11,7 +11,12 @@
       "Bash(pnpm e2e:*)",
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm --filter content-reviewer lint:fix:*)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(docker exec:*)",
+      "Bash(pnpm test:*)"
     ]
   }
 }
