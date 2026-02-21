@@ -237,7 +237,7 @@
         "id": "knowledge-presentation",
         "description": "knowledge context の presentation 層を実装。src/backend/contexts/knowledge/presentation/composition/knowledge-article.composition.ts に createListKnowledgeArticlesUseCase / createCreateKnowledgeArticleUseCase / createUpdateKnowledgeArticleUseCase / createDeleteKnowledgeArticleUseCase ファクトリ関数（PrismaKnowledgeArticleRepository + PrismaKnowledgeEmbeddingRepository + OpenAIEmbeddingGateway + prisma を注入）。src/backend/contexts/knowledge/presentation/loaders/knowledge-articles.loader.ts に loadKnowledgeArticles()（UseCase 経由で一覧取得）。src/backend/contexts/knowledge/presentation/actions/create-knowledge-article.action.ts、update-knowledge-article.action.ts、delete-knowledge-article.action.ts に 'use server' Server Actions（FormData → UseCase 呼び出し → revalidatePath('/knowledge')）。開発環境ではダミーユーザー ID を使用",
         "wave": 4,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-ui",
