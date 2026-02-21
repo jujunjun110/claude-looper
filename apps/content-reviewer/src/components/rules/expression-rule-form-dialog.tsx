@@ -1,10 +1,10 @@
 'use client';
 
-import type { ExpressionRule } from '@/backend/contexts/expression-rule/domain/models/expression-rule.model';
 import {
 	createExpressionRuleAction,
 	updateExpressionRuleAction,
 } from '@/backend/contexts/expression-rule/presentation/actions/expression-rule.action';
+import type { ExpressionRuleDTO } from '@/backend/contexts/expression-rule/presentation/loaders/expression-rule.loader';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -21,7 +21,7 @@ import { Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 interface ExpressionRuleFormDialogProps {
-	rule?: ExpressionRule;
+	rule?: ExpressionRuleDTO;
 }
 
 export function ExpressionRuleFormDialog({ rule }: ExpressionRuleFormDialogProps) {
@@ -53,7 +53,7 @@ export function ExpressionRuleFormDialog({ rule }: ExpressionRuleFormDialogProps
 		try {
 			if (isEdit && rule) {
 				await updateExpressionRuleAction({
-					id: rule.id as string,
+					id: rule.id,
 					ngExpression,
 					recommendedExpression,
 					description: description || null,
