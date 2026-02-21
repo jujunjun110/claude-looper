@@ -1,11 +1,9 @@
-[
-  {
+[{
     "milestone": 1,
     "goal": "pnpm workspace + Next.js App Router プロジェクトが起動し、Biome lint / typecheck / build が通り、shadcn/ui + Tailwind CSS でレイアウト（サイドバー + ヘッダー）が表示され、Prisma スキーマに全テーブルが定義されて prisma generate が成功する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build",
     "done": true,
-    "tasks": [
-      {
+    "tasks": [{
         "id": "project-scaffold",
         "description": "pnpm workspace + Next.js App Router プロジェクトの初期構築。ルート package.json（workspace scripts: lint, typecheck, build）、pnpm-workspace.yaml、apps/content-reviewer/ 配下に package.json・next.config.ts・tsconfig.json・tailwind.config.ts・postcss.config.mjs・biome.json を作成し、Tailwind CSS v4 + PostCSS を設定、apps/content-reviewer/src/app/globals.css に Tailwind ディレクティブを記述、最小限の app/layout.tsx と app/page.tsx で pnpm build が通る状態にする",
         "wave": 1,
@@ -48,8 +46,7 @@
     "goal": "Supabase Auth による Google OAuth ログイン・ログアウトが動作し、未認証時は /login にリダイレクトされ、開発環境（NODE_ENV=development）では認証スキップでダミーユーザーとしてダッシュボード（空の / ページ）にアクセスできる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "done": true,
-    "tasks": [
-      {
+    "tasks": [{
         "id": "auth-deps-and-test-setup",
         "description": "apps/content-reviewer/package.json に @supabase/supabase-js, @supabase/ssr, vitest を追加し pnpm install を実行。apps/content-reviewer/vitest.config.ts を作成（src/ 配下のテストを対象、パスエイリアス @/ を設定）。apps/content-reviewer/package.json に test script（vitest run）を追加。ルート package.json に test script（pnpm -r run test）を追加",
         "wave": 1,
@@ -116,8 +113,7 @@
     "goal": "/rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、ExpressionRule ドメインモデル → PrismaExpressionRuleRepository → UseCase（CRUD 4種） → Server Actions → UI の全レイヤーが縦に通って DB に永続化される",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": true,
-    "tasks": [
-      {
+    "tasks": [{
         "id": "expression-rule-contracts",
         "description": "expression-rule context の契約定義。src/backend/contexts/shared/domain/models/expression-rule-id.model.ts に ExpressionRuleId branded type（createExpressionRuleId ファクトリ + UUID バリデーション）を作成。src/backend/contexts/expression-rule/domain/models/expression-rule.model.ts に ExpressionRule クラスの型定義（ExpressionRuleProps interface: id, ngExpression, recommendedExpression, description, isActive, createdBy, createdAt, updatedAt）と Result 型を定義。src/backend/contexts/expression-rule/domain/gateways/expression-rule.repository.ts に ExpressionRuleRepository interface（save, findById, findAll, findActive, delete）をドメインモデル型のみで定義",
         "wave": 1,
@@ -183,9 +179,8 @@
     "milestone": 4,
     "goal": "/knowledge ページでナレッジ記事の一覧表示・手動登録・編集ができ、保存時に OpenAI Embeddings API で Embedding が自動生成されて pgvector に格納され、KnowledgeArticle / KnowledgeEmbedding ドメインモデル → Repository → UseCase → UI が動作する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
-    "done": false,
-    "tasks": [
-      {
+    "done": true,
+    "tasks": [{
         "id": "knowledge-contracts",
         "description": "knowledge context の契約定義。src/backend/contexts/shared/domain/models/knowledge-article-id.model.ts（KnowledgeArticleId branded type + UUID バリデーション）、knowledge-embedding-id.model.ts（KnowledgeEmbeddingId branded type）を作成。src/backend/contexts/shared/domain/gateways/embedding.gateway.ts に EmbeddingGateway interface（generateEmbedding(text: string): Promise<number[]>）を定義。src/backend/contexts/knowledge/domain/models/knowledge-article.model.ts に KnowledgeArticleProps interface と Result 型の型定義のみを記述。src/backend/contexts/knowledge/domain/models/knowledge-embedding.model.ts に KnowledgeEmbeddingProps interface と型定義のみを記述。src/backend/contexts/knowledge/domain/gateways/knowledge-article.repository.ts に KnowledgeArticleRepository interface（save, findById, findAll, delete）を定義。src/backend/contexts/knowledge/domain/gateways/knowledge-embedding.repository.ts に KnowledgeEmbeddingRepository interface（saveMany, deleteByArticleId, searchSimilar）を定義",
         "wave": 1,
@@ -246,28 +241,10 @@
         "done": true
       },
       {
-        "id": "verify-milestone4",
-        "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
-        "wave": 6,
-        "done": false
-      },
-      {
-        "id": "fix-e2e-next-build-conflict",
-        "description": "E2E テストが Runtime Error で失敗する問題を修正する。原因: pnpm build（本番ビルド）実行後に pnpm e2e を実行すると playwright.config.ts の webServer.command である pnpm dev が .next/ ディレクトリの不完全な状態で起動し、'ENOENT: no such file or directory, open .../.next/server/pages/_document.js' エラーが発生してページが表示されない。修正方針: playwright.config.ts の webServer.command を 'pnpm dev' から '.next/ を削除してから pnpm dev を起動するコマンド' に変更するか、または pnpm verify の e2e 実行前に .next/ をクリアするステップを追加する（例: 'rm -rf .next && pnpm dev'）。あるいは webServer を 'next build && next start' に変更して本番ビルドのサーバーで E2E を実行することも検討する",
-        "wave": 7,
-        "done": false
-      },
-      {
         "id": "fix-knowledge-embedding-repository-test-dimensions",
         "description": "prisma-knowledge-embedding.repository.test.ts の sampleEmbeddingValues が Array.from({ length: 3 }, ...) で3次元になっており、KnowledgeEmbedding.create() の1536次元バリデーションで失敗している。修正方針: sampleEmbeddingValues を Array.from({ length: 1536 }, (_, i) => (i + 1) * 0.001) に変更する。また searchSimilar テストの rawRows.embedding も '[0.1,0.2,...（1536次元分）]' に更新する（reconstruct はバリデーションなしなので現状は通るが、正しいテストデータにする）",
         "wave": 8,
         "done": true
-      },
-      {
-        "id": "fix-e2e-database-url-missing",
-        "description": "E2E テストが DATABASE_URL 未設定環境でクラッシュする問題を修正する。原因: pnpm e2e 実行時に playwright.config.ts の webServer.command である pnpm dev が起動し、/rules・/knowledge ページアクセス時に PrismaClientInitializationError（DATABASE_URL not found）が発生してページが表示されない。修正方針: docs/infrastructure.md の「ローカル開発環境」セクションに従い、Supabase CLI でローカル DB を立てて DATABASE_URL を設定する。手順: (1) supabase start でローカル Supabase を起動、(2) supabase status で DB URL を取得、(3) apps/content-reviewer/.env.local に DATABASE_URL を設定、(4) prisma db push でスキーマを反映、(5) pnpm verify を再実行して E2E が通ることを確認する。ANTHROPIC_API_KEY と OPENAI_API_KEY はローカルの .env に既存。",
-        "wave": 9,
-        "done": false
       }
     ]
   },
