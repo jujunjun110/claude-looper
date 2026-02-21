@@ -32,10 +32,27 @@ export class ContentSegment {
 		text: string;
 		segmentIndex: number;
 	}): Result<ContentSegment, string> {
-		throw new Error('not implemented');
+		if (!props.text || props.text.trim().length === 0) {
+			return { success: false, error: 'Segment text cannot be empty' };
+		}
+
+		if (!Number.isInteger(props.segmentIndex) || props.segmentIndex < 0) {
+			return { success: false, error: 'Segment index must be a non-negative integer' };
+		}
+
+		return {
+			success: true,
+			value: new ContentSegment({
+				id: props.id,
+				contentCheckId: props.contentCheckId,
+				text: props.text,
+				segmentIndex: props.segmentIndex,
+				createdAt: new Date(),
+			}),
+		};
 	}
 
 	static reconstruct(props: ContentSegmentProps): ContentSegment {
-		throw new Error('not implemented');
+		return new ContentSegment(props);
 	}
 }

@@ -24,6 +24,16 @@ export interface CheckResultProps {
 	readonly createdAt: Date;
 }
 
+const VALID_CHECK_TYPES: CheckType[] = [
+	'fact_check',
+	'knowledge_consistency',
+	'expression_rule',
+	'risk_assessment',
+	'quality',
+];
+
+const VALID_SEVERITIES: Severity[] = ['info', 'warning', 'error'];
+
 export class CheckResult {
 	readonly id: CheckResultId;
 	readonly segmentId: ContentSegmentId;
@@ -54,10 +64,34 @@ export class CheckResult {
 		message: string;
 		suggestion?: string | null;
 	}): Result<CheckResult, string> {
-		throw new Error('not implemented');
+		if (!props.message || props.message.trim().length === 0) {
+			return { success: false, error: 'Message cannot be empty' };
+		}
+
+		if (!VALID_CHECK_TYPES.includes(props.checkType)) {
+			return { success: false, error: `Invalid checkType: ${props.checkType}` };
+		}
+
+		if (!VALID_SEVERITIES.includes(props.severity)) {
+			return { success: false, error: `Invalid severity: ${props.severity}` };
+		}
+
+		return {
+			success: true,
+			value: new CheckResult({
+				id: props.id,
+				segmentId: props.segmentId,
+				contentCheckId: props.contentCheckId,
+				checkType: props.checkType,
+				severity: props.severity,
+				message: props.message,
+				suggestion: props.suggestion ?? null,
+				createdAt: new Date(),
+			}),
+		};
 	}
 
 	static reconstruct(props: CheckResultProps): CheckResult {
-		throw new Error('not implemented');
+		return new CheckResult(props);
 	}
 }

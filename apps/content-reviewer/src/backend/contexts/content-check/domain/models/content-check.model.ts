@@ -15,6 +15,8 @@ export interface ContentCheckProps {
 	readonly updatedAt: Date;
 }
 
+const MAX_CONTENT_LENGTH = 30000;
+
 export class ContentCheck {
 	readonly id: ContentCheckId;
 	readonly userId: UserId;
@@ -39,22 +41,100 @@ export class ContentCheck {
 		userId: UserId;
 		content: string;
 	}): Result<ContentCheck, string> {
-		throw new Error('not implemented');
+		if (!props.content || props.content.trim().length === 0) {
+			return { success: false, error: 'Content cannot be empty' };
+		}
+
+		if (props.content.length > MAX_CONTENT_LENGTH) {
+			return {
+				success: false,
+				error: `Content cannot exceed ${MAX_CONTENT_LENGTH} characters`,
+			};
+		}
+
+		const now = new Date();
+		return {
+			success: true,
+			value: new ContentCheck({
+				id: props.id,
+				userId: props.userId,
+				content: props.content,
+				status: 'pending',
+				failedReason: null,
+				createdAt: now,
+				updatedAt: now,
+			}),
+		};
 	}
 
 	static reconstruct(props: ContentCheckProps): ContentCheck {
-		throw new Error('not implemented');
+		return new ContentCheck(props);
 	}
 
 	startProcessing(): Result<ContentCheck, string> {
-		throw new Error('not implemented');
+		if (this.status !== 'pending') {
+			return {
+				success: false,
+				error: `Cannot start processing from status: ${this.status}`,
+			};
+		}
+
+		return {
+			success: true,
+			value: new ContentCheck({
+				...this.toProps(),
+				status: 'processing',
+				updatedAt: new Date(),
+			}),
+		};
 	}
 
 	complete(): Result<ContentCheck, string> {
-		throw new Error('not implemented');
+		if (this.status !== 'processing') {
+			return {
+				success: false,
+				error: `Cannot complete from status: ${this.status}`,
+			};
+		}
+
+		return {
+			success: true,
+			value: new ContentCheck({
+				...this.toProps(),
+				status: 'completed',
+				updatedAt: new Date(),
+			}),
+		};
 	}
 
 	fail(reason?: string): Result<ContentCheck, string> {
-		throw new Error('not implemented');
+		if (this.status !== 'pending' && this.status !== 'processing') {
+			return {
+				success: false,
+				error: `Cannot fail from status: ${this.status}`,
+			};
+		}
+
+		return {
+			success: true,
+			value: new ContentCheck({
+				...this.toProps(),
+				status: 'failed',
+				failedReason: reason ?? null,
+				updatedAt: new Date(),
+			}),
+		};
+	}
+
+	private toProps(): ContentCheckProps {
+		return {
+			id: this.id,
+			userId: this.userId,
+			content: this.content,
+			status: this.status,
+			failedReason: this.failedReason,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+		};
 	}
 }
