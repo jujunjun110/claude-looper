@@ -79,10 +79,25 @@ describe('KnowledgeEmbedding', () => {
 				knowledgeArticleId: validArticleId,
 				chunkIndex: 0,
 				chunkText: 'テキスト',
-				embedding: [0.1, 0.2],
+				embedding: validEmbedding,
 			});
 
 			expect(result.success).toBe(true);
+		});
+
+		it('should fail when embedding dimension is not 1536', () => {
+			const result = KnowledgeEmbedding.create({
+				id: validEmbeddingId,
+				knowledgeArticleId: validArticleId,
+				chunkIndex: 0,
+				chunkText: 'チャンクテキスト',
+				embedding: [0.1, 0.2, 0.3],
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error).toBe('Embedding must have 1536 dimensions, got 3');
+			}
 		});
 	});
 
