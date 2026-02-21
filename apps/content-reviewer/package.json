@@ -8,15 +8,18 @@
 		"start": "next start",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"prisma:generate": "prisma generate"
 	},
 	"dependencies": {
+		"@prisma/client": "5.22.0",
 		"next": "^15.3.3",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"prisma": "5.22.0",
 		"@tailwindcss/postcss": "^4.1.7",
 		"@types/node": "^22.15.21",
 		"@types/react": "^19.1.4",
