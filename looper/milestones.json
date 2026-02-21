@@ -313,7 +313,7 @@
         "id": "content-check-contracts",
         "description": "content-check context の全契約定義（W2以降の全タスクが参照する）。(1) src/backend/contexts/shared/domain/models/ に ContentCheckId・ContentSegmentId・CheckResultId の各 branded type（createXxxId ファクトリ + UUID バリデーション）を追加。(2) src/backend/contexts/shared/domain/gateways/ai.gateway.ts を新規作成（AIGateway interface: generate(prompt, options?): Promise<string>、generateWithWebSearch(prompt, options?): Promise<string>、generateStream(prompt, options?): AsyncGenerator<string> + GenerateOptions 型）。(3) src/backend/contexts/content-check/domain/models/content-check.model.ts に ContentCheckProps interface・CheckStatus type ('pending'|'processing'|'completed'|'failed')・Result型・ContentCheck クラス骨格（create/reconstruct/startProcessing/complete/fail のメソッドシグネチャ、ボディは throw new Error('not implemented')）を定義。(4) content-segment.model.ts に ContentSegmentProps + ContentSegment クラス骨格を定義。(5) check-result.model.ts に CheckType type ('fact_check'|'knowledge_consistency'|'expression_rule'|'risk_assessment'|'quality')・Severity type ('info'|'warning'|'error')・CheckResultProps・CheckResult クラス骨格を定義。(6) src/backend/contexts/content-check/domain/gateways/ に ContentCheckFilter 型・ContentCheckRepository（save, findById, findAll(filter)）・ContentSegmentRepository（saveMany, findByContentCheckId）・CheckResultRepository（saveMany, findBySegmentId, findByContentCheckId）・ExpressionRuleProvider（findActiveRules(): Promise<{ngExpression: string; recommendedExpression: string}[]>）・KnowledgeSearchGateway（searchSimilar(embedding: number[], limit: number): Promise<{chunkText: string}[]>）の各 interface ファイルを新規作成する",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "content-check-domain-models",

@@ -62,7 +62,9 @@ lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
 ### 検証実行
 
-`pnpm verify:full` を実行する。E2E にはローカル Supabase が必要なので、実行前に `supabase status` で起動を確認し、停止中なら `supabase start` + `prisma db push` を行うこと。
+`pnpm verify:full` を実行する。E2E にはローカル Supabase が必要なので、実行前に `pnpm supabase status` で起動を確認し、停止中なら `pnpm supabase start` + `prisma db push` を行うこと。
+
+> **注意:** `supabase` コマンドはグローバルインストールされていない。必ず `pnpm supabase` 経由で実行すること（pnpm が node_modules/.bin を解決する）。
 
 ## ステップ3.5: UI の動作確認（UIの変更を伴う場合のみ）
 
@@ -112,8 +114,8 @@ lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
    **A. 環境・インフラの問題**（DB が動いていない、環境変数がない、ツールが未セットアップ等）
    → コードではなく環境を整えるタスクを設計する。例:
-   - `supabase init` + `supabase start` + `prisma db push` でローカル DB を構築する
-   - `.env` ファイルを `supabase status` の出力から生成する
+   - `pnpm supabase init` + `pnpm supabase start` + `prisma db push` でローカル DB を構築する
+   - `.env` ファイルを `pnpm supabase status` の出力から生成する
    - 必要なツールのインストール・設定
 
    **B. コードのバグ・型エラー・lint エラー**
