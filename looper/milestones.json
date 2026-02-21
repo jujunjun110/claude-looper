@@ -145,13 +145,13 @@
         "id": "expression-rule-usecase-tests",
         "description": "UseCase 4種のユニットテストを作成。src/backend/contexts/expression-rule/application/usecases/__tests__/create-expression-rule.usecase.test.ts、update-expression-rule.usecase.test.ts、delete-expression-rule.usecase.test.ts、list-expression-rules.usecase.test.ts。ExpressionRuleRepository をモックし、正常系・異常系（バリデーションエラー、存在しないルールの更新/削除）をテスト。vitest で全テスト pass を確認",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "playwright-setup",
         "description": "apps/content-reviewer/package.json に @playwright/test を devDependencies に追加し pnpm install を実行。apps/content-reviewer/playwright.config.ts を作成（baseURL: http://localhost:3000、webServer で next dev 起動、テストディレクトリ: e2e/）。apps/content-reviewer/e2e/rules.spec.ts に /rules ページの E2E テストを作成（ルール一覧表示、新規登録フォーム表示、登録→一覧に表示、編集、削除の基本シナリオ）。ルート package.json の scripts に e2e script を追加",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-presentation",
@@ -169,6 +169,12 @@
         "id": "verify-milestone3",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
         "wave": 4,
+        "done": false
+      },
+      {
+        "id": "fix-create-usecase-test-type-error",
+        "description": "typecheck エラーの修正。原因: test/unit/contexts/expression-rule/application/usecases/create-expression-rule.usecase.test.ts が CreateExpressionRuleInput に 'id' フィールドを渡しているが、最終的な UseCase 実装（UUID自動生成方式）では 'id' が input に含まれない。コンフリクト解決の結果 expression-rule-usecase-tests ブランチの実装（UUID自動生成）を採用したが、expression-rule-usecases ブランチのテストファイル（test/unit/ 配下）が古い設計のままになっている。修正方針: test/unit/.../ create-expression-rule.usecase.test.ts の各 execute() 呼び出しから 'id' フィールドを削除し、result.id のアサーションは UUID 形式（expect(result.id).toMatch(/^[0-9a-f-]{36}$/)）に変更する",
+        "wave": 5,
         "done": false
       }
     ]
