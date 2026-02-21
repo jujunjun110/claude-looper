@@ -225,13 +225,13 @@
         "id": "knowledge-usecases",
         "description": "knowledge context の UseCase 3種を実装。src/backend/contexts/knowledge/application/usecases/create-knowledge-article.usecase.ts（KnowledgeArticleRepository + KnowledgeEmbeddingRepository + EmbeddingGateway を DI。KnowledgeArticle.create → repository.save → EmbeddingGateway.generateEmbedding でチャンク分割なし全文 Embedding → KnowledgeEmbedding.create → embeddingRepository.saveMany）。update-knowledge-article.usecase.ts（findById → update → save → deleteByArticleId → 再 Embedding 生成 → saveMany）。list-knowledge-articles.usecase.ts（repository.findAll）。delete-knowledge-article.usecase.ts（findById → embeddingRepository.deleteByArticleId → repository.delete）。各 UseCase はクラスベース + constructor DI + execute() メソッド",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-usecase-tests",
         "description": "UseCase 4種のユニットテストを作成。src/backend/contexts/knowledge/application/usecases/__tests__/create-knowledge-article.usecase.test.ts（KnowledgeArticleRepository・KnowledgeEmbeddingRepository・EmbeddingGateway をモック、正常系: EmbeddingGateway.generateEmbedding が呼ばれ embeddingRepository.saveMany も呼ばれることを検証）。update-knowledge-article.usecase.test.ts（記事更新 + Embedding 再生成の検証）。list-knowledge-articles.usecase.test.ts。delete-knowledge-article.usecase.test.ts（deleteByArticleId → delete の順序検証）。vitest で全テスト pass を確認",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-presentation",
@@ -261,6 +261,12 @@
         "id": "fix-knowledge-embedding-repository-test-dimensions",
         "description": "prisma-knowledge-embedding.repository.test.ts の sampleEmbeddingValues が Array.from({ length: 3 }, ...) で3次元になっており、KnowledgeEmbedding.create() の1536次元バリデーションで失敗している。修正方針: sampleEmbeddingValues を Array.from({ length: 1536 }, (_, i) => (i + 1) * 0.001) に変更する。また searchSimilar テストの rawRows.embedding も '[0.1,0.2,...（1536次元分）]' に更新する（reconstruct はバリデーションなしなので現状は通るが、正しいテストデータにする）",
         "wave": 8,
+        "done": true
+      },
+      {
+        "id": "fix-e2e-database-url-missing",
+        "description": "E2E テストが DATABASE_URL 未設定環境でクラッシュする問題を修正する。原因: pnpm e2e 実行時に playwright.config.ts の webServer.command である pnpm dev が起動し、/rules ページアクセス時に PrismaExpressionRuleRepository.findAll() が 'Environment variable not found: DATABASE_URL' エラーをスローしてページが表示されない（PrismaClientInitializationError）。結果として E2E テストが全てタイムアウトで失敗する。修正方針: rules/page.tsx と knowledge/page.tsx のローダー呼び出し部分、または各 Repository 実装に DATABASE_URL 未設定時のガード（開発環境ではモックデータを返す）を追加する。あるいは E2E テスト用の .env.test ファイルに SQLite や in-memory DB を設定し、テスト環境で DB なしでも動作するようにする。最も簡単な方法は presentation/loaders に開発環境ガードを追加してモックデータを返すことだが、長期的には DATABASE_URL をローカル開発 .env.local に設定することが推奨される",
+        "wave": 9,
         "done": false
       }
     ]

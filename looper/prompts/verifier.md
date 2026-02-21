@@ -50,6 +50,18 @@ git worktree remove /tmp/ralph-worktrees/{task-id} --force
 
 ## ステップ3: 品質検証
 
+### E2E テスト実行前のポート開放
+
+`pnpm verify` の前に、E2E テストが使用するポート（3000 等）を占有しているプロセスを kill する。Builder が並列実行した際の残プロセスがポートを占有していることがある。
+
+```bash
+lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+```
+
+**ポート競合（EADDRINUSE）による E2E 失敗は「環境依存の既知問題」ではない。** 上記の手順で解決できる問題であり、スキップや無視をしてはならない。
+
+### 検証実行
+
 `pnpm verify` を実行する。
 
 ## ステップ3.5: UI の動作確認（UIの変更を伴う場合のみ）
