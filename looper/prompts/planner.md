@@ -25,9 +25,9 @@ Wave で依存順序を表現します（契約先行パターン）:
 
 - W1: interface/型定義（契約）→ 1-2 task
   - W2 以降の複数タスクが参照する共有型（enum, union type 等）は全て W1 で定義すること
-- W2: 独立した実装 → 最大 5 task（並列実行）
-- W3: さらに独立した実装 → 最大 5 task（並列実行）
-- W4: さらに独立した実装 → 最大 5 task（並列実行）
+- W2: 独立した実装 → 最大 8 task（並列実行）
+- W3: さらに独立した実装 → 最大 8 task（並列実行）
+- W4: さらに独立した実装 → 最大 8 task（並列実行）
 - W5: テスト・統合 → 1 task
 
 Wave は必要な分だけ使ってください（W1-W3 で十分なら W4, W5 は不要）。
@@ -92,5 +92,5 @@ git add looper/milestones.json && git commit -m "chore: Milestone __MILESTONE__ 
 - **対象 Milestone 以外のエントリは変更しない**
 - **milestone, goal, done フィールドは変更しない。tasks のみ追加する**
 - description は具体的に（どのディレクトリにどのファイルを作るか分かるレベル）
-- 同一 Wave の task 数は最大 5 個
+- 同一 Wave の task 数は最大 8 個
 - id は kebab-case で一意にする
