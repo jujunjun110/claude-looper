@@ -189,7 +189,7 @@
         "id": "knowledge-contracts",
         "description": "knowledge context の契約定義。src/backend/contexts/shared/domain/models/knowledge-article-id.model.ts（KnowledgeArticleId branded type + UUID バリデーション）、knowledge-embedding-id.model.ts（KnowledgeEmbeddingId branded type）を作成。src/backend/contexts/shared/domain/gateways/embedding.gateway.ts に EmbeddingGateway interface（generateEmbedding(text: string): Promise<number[]>）を定義。src/backend/contexts/knowledge/domain/models/knowledge-article.model.ts に KnowledgeArticleProps interface と Result 型の型定義のみを記述。src/backend/contexts/knowledge/domain/models/knowledge-embedding.model.ts に KnowledgeEmbeddingProps interface と型定義のみを記述。src/backend/contexts/knowledge/domain/gateways/knowledge-article.repository.ts に KnowledgeArticleRepository interface（save, findById, findAll, delete）を定義。src/backend/contexts/knowledge/domain/gateways/knowledge-embedding.repository.ts に KnowledgeEmbeddingRepository interface（saveMany, deleteByArticleId, searchSimilar）を定義",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-article-domain-model",
@@ -249,6 +249,12 @@
         "id": "verify-milestone4",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
         "wave": 6,
+        "done": false
+      },
+      {
+        "id": "fix-e2e-next-build-conflict",
+        "description": "E2E テストが Runtime Error で失敗する問題を修正する。原因: pnpm build（本番ビルド）実行後に pnpm e2e を実行すると playwright.config.ts の webServer.command である pnpm dev が .next/ ディレクトリの不完全な状態で起動し、'ENOENT: no such file or directory, open .../.next/server/pages/_document.js' エラーが発生してページが表示されない。修正方針: playwright.config.ts の webServer.command を 'pnpm dev' から '.next/ を削除してから pnpm dev を起動するコマンド' に変更するか、または pnpm verify の e2e 実行前に .next/ をクリアするステップを追加する（例: 'rm -rf .next && pnpm dev'）。あるいは webServer を 'next build && next start' に変更して本番ビルドのサーバーで E2E を実行することも検討する",
+        "wave": 7,
         "done": false
       }
     ]

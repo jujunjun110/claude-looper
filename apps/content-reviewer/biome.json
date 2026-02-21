@@ -21,6 +21,6 @@
 		}
 	},
 	"files": {
-		"ignore": [".next/", "node_modules/", "next-env.d.ts"]
+		"ignore": [".next/", "node_modules/", "next-env.d.ts", "test-results/"]
 	}
 }
