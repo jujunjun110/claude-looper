@@ -4,7 +4,44 @@
     "goal": "pnpm workspace + Next.js App Router プロジェクトが起動し、Biome lint / typecheck / build が通り、shadcn/ui + Tailwind CSS でレイアウト（サイドバー + ヘッダー）が表示され、Prisma スキーマに全テーブルが定義されて prisma generate が成功する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build",
     "done": false,
-    "tasks": []
+    "tasks": [
+      {
+        "id": "project-scaffold",
+        "description": "pnpm workspace + Next.js App Router プロジェクトの初期構築。ルート package.json（workspace scripts: lint, typecheck, build）、pnpm-workspace.yaml、apps/content-reviewer/ 配下に package.json・next.config.ts・tsconfig.json・tailwind.config.ts・postcss.config.mjs・biome.json を作成し、Tailwind CSS v4 + PostCSS を設定、apps/content-reviewer/src/app/globals.css に Tailwind ディレクティブを記述、最小限の app/layout.tsx と app/page.tsx で pnpm build が通る状態にする",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "shadcn-ui-setup",
+        "description": "apps/content-reviewer/ で shadcn/ui を初期化し、components.json を生成。lib/utils.ts に cn() ヘルパーを作成。レイアウトに必要な shadcn/ui コンポーネント（Button, Sheet, Separator, Sidebar 系）を components/ui/ に追加する",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "prisma-schema",
+        "description": "apps/content-reviewer/prisma/schema.prisma に全 7 テーブル（users, content_checks, content_segments, check_results, expression_rules, knowledge_articles, knowledge_embeddings）を定義。pgvector 拡張の有効化、全リレーション・インデックス・enum（source, status, check_type, severity, source_type）を含め、prisma generate が成功する状態にする",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "app-layout-shell",
+        "description": "apps/content-reviewer/src/app/layout.tsx にルートレイアウトを実装。shadcn/ui の Sidebar コンポーネントを使ったサイドバー（ナビゲーション: ダッシュボード, チェック実行, 表現ルール, ナレッジ）+ ヘッダー（アプリ名表示）のシェル UI を components/layout/ 配下に作成（sidebar-nav.tsx, header.tsx, app-shell.tsx）し、レスポンシブ対応する",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "stub-pages",
+        "description": "全ルートのスタブページを作成: app/page.tsx（ダッシュボード）、app/login/page.tsx、app/checks/new/page.tsx、app/checks/[id]/page.tsx、app/rules/page.tsx、app/knowledge/page.tsx、app/knowledge/import/page.tsx。各ページはページタイトルのみ表示する Server Component とし、app-shell レイアウトでラップされた状態にする",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "verify-milestone1",
+        "description": "pnpm lint && pnpm typecheck && pnpm build を実行し全て成功することを確認。prisma generate が成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラーがあれば全て修正する",
+        "wave": 4,
+        "done": false
+      }
+    ]
   },
   {
     "milestone": 2,
