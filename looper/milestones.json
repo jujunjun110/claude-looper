@@ -59,7 +59,7 @@
         "id": "auth-contracts",
         "description": "auth context と shared context の型定義を作成。src/backend/contexts/shared/domain/models/user-id.model.ts（UserId branded type）、src/backend/contexts/shared/domain/models/email.model.ts（Email 値オブジェクト、バリデーション付き）。src/backend/contexts/auth/domain/models/user.model.ts の interface/型定義（id, email, name, avatarUrl, createdAt, updatedAt）。src/backend/contexts/auth/domain/gateways/auth.gateway.ts（AuthGateway interface: getCurrentUser, signInWithGoogle, signOut, onAuthStateChange）。src/backend/contexts/auth/domain/gateways/user.repository.ts（UserRepository interface: findById, findByEmail, upsert）",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "supabase-client-init",
