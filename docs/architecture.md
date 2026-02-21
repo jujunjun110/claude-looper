@@ -9,7 +9,7 @@ pnpm workspace + Next.js App Router における DDD バックエンド設計規
 
 | 層 | ディレクトリ | 責務 |
 |---|---|---|
-| presentation | `loaders/` `actions/` | Next.js Server Components / Server Actions との接続 |
+| presentation | `composition/` `loaders/` `actions/` | Next.js Server Components / Server Actions との接続 |
 | application | `usecases/` | ユースケースオーケストレーション。プロンプト生成・レスポンスパース含む |
 | domain | `models/` `services/` `gateways/` | ビジネスルール。外部依存なし |
 | infrastructure | `ai/` `repositories/` | Gateway / Repository 実装。外部サービス接続 |
@@ -23,22 +23,25 @@ pnpm workspace + Next.js App Router における DDD バックエンド設計規
 - **domain は最内層。** 他層への依存禁止
 - **application → domain のみ。** infrastructure への直接依存禁止（Gateway interface 経由）
 - **infrastructure → domain/gateways。** interface を implements する
-- **presentation → application のみ。** domain 直接参照禁止
+- **presentation/loaders, actions → application + presentation/composition のみ。** domain・infrastructure 直接参照禁止
+- **presentation/composition → 全層。** UseCase と infrastructure 実装を組み立てる唯一の場所（後述）
 - **フロントエンド** (`app/`, `components/`, `hooks/`, `lib/`) **→ backend/presentation/ のみ**
 
 ---
 
-## presentation 層: loaders / actions
+## presentation 層: composition / loaders / actions
 
 Next.js と DDD の唯一の接続点。**API Route は原則使用しない。**
 
 | 種別 | 責務 | 呼び出し元 |
 |---|---|---|
+| composition | UseCase + infrastructure 実装の組み立て（Composition Root） | loader, action |
 | loader | データ取得（読み取り専用） | Server Component (`page.tsx`) |
 | action | 副作用（CUD, SSE ストリーム） | Server Actions (`'use server'`) |
 
 - **page.tsx は loader を呼んで props を渡すだけ。** ロジック禁止
-- **loader / action は UseCase を呼ぶ。** DB / 外部 API 直接アクセス禁止
+- **loader / action は composition から UseCase を取得して呼ぶ。** infrastructure の直接 import 禁止
+- **composition は全層を参照してよい唯一の場所。** UseCase に infrastructure 実装を注入し、ファクトリ関数としてエクスポートする
 - API Route は外部 Webhook 受信等の例外のみ許可
 
 ---
@@ -116,6 +119,7 @@ kebab-case + ドット区切りレイヤーサフィックス。ハイフンで�
 | Repository Interface | `.repository.ts` |
 | AI Gateway 実装 | `.ai-gateway.ts` |
 | Repository 実装 | `.repository.ts` |
+| Composition | `.composition.ts` |
 | Loader | `.loader.ts` |
 | Action | `.action.ts` |
 | テスト | `.test.ts` |
@@ -128,6 +132,6 @@ kebab-case + ドット区切りレイヤーサフィックス。ハイフンで�
 - 関数ベースの domain service
 - Anemic Domain Model（データ構造だけのモデル）
 - application → infrastructure の直接依存
-- presentation → domain の直接依存
+- presentation/loaders, actions → domain・infrastructure の直接依存（composition 経由で解決）
 - infrastructure 層にビジネスロジック（プロンプト生成含む）
 - page.tsx にデータ取得・ビジネスロジック
