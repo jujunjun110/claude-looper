@@ -31,9 +31,9 @@ run_claude() {
 	local prompt="$1" logfile="$2"
 	timeout "$SESSION_TIMEOUT" \
 		env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-		claude -p --allow-dangerously-skip-permissions --dangerously-skip-permissions --verbose \
+		claude -p --verbose --allow-dangerously-skip-permissions --dangerously-skip-permissions \
 		--output-format stream-json \
-		"$prompt" > "$logfile" 2>&1
+		"$prompt" < /dev/null > "$logfile" 2>&1
 }
 
 symlink_node_modules() {
