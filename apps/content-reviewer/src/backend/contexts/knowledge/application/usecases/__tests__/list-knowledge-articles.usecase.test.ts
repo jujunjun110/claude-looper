@@ -5,17 +5,19 @@ import { createKnowledgeArticleId } from '@/backend/contexts/shared/domain/model
 import { createUserId } from '@/backend/contexts/shared/domain/models/user-id.model';
 import { describe, expect, it, vi } from 'vitest';
 
-function buildArticle(title: string): KnowledgeArticle {
+function buildArticle(idSuffix: string): KnowledgeArticle {
 	const result = KnowledgeArticle.create({
-		id: createKnowledgeArticleId(
-			`${Math.random().toString(16).slice(2).padEnd(8, '0').slice(0, 8)}-1111-1111-1111-111111111111`,
-		),
-		title,
-		content: '本文',
+		id: createKnowledgeArticleId(`00000000-0000-0000-0000-00000000000${idSuffix}`),
+		title: `タイトル${idSuffix}`,
+		content: `コンテンツ${idSuffix}`,
 		sourceType: 'manual',
-		createdBy: createUserId('11111111-1111-1111-1111-111111111111'),
+		createdBy: createUserId('user-123'),
 	});
-	if (!result.success) throw new Error(result.error);
+
+	if (!result.success) {
+		throw new Error('Failed to build test fixture');
+	}
+
 	return result.value;
 }
 
@@ -32,8 +34,8 @@ function createMockArticleRepository(
 }
 
 describe('ListKnowledgeArticlesUseCase', () => {
-	it('should return all articles from repository', async () => {
-		const articles = [buildArticle('記事1'), buildArticle('記事2')];
+	it('should return all knowledge articles', async () => {
+		const articles = [buildArticle('1'), buildArticle('2'), buildArticle('3')];
 		const articleRepository = createMockArticleRepository({
 			findAll: vi.fn().mockResolvedValue(articles),
 		});
@@ -41,13 +43,14 @@ describe('ListKnowledgeArticlesUseCase', () => {
 
 		const result = await useCase.execute();
 
-		expect(result).toBe(articles);
-		expect(result).toHaveLength(2);
+		expect(result).toEqual(articles);
 		expect(articleRepository.findAll).toHaveBeenCalledOnce();
 	});
 
 	it('should return empty array when no articles exist', async () => {
-		const articleRepository = createMockArticleRepository();
+		const articleRepository = createMockArticleRepository({
+			findAll: vi.fn().mockResolvedValue([]),
+		});
 		const useCase = new ListKnowledgeArticlesUseCase(articleRepository);
 
 		const result = await useCase.execute();

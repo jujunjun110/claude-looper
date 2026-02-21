@@ -6,18 +6,19 @@ import { createKnowledgeArticleId } from '@/backend/contexts/shared/domain/model
 import { createUserId } from '@/backend/contexts/shared/domain/models/user-id.model';
 import { describe, expect, it, vi } from 'vitest';
 
-const ARTICLE_ID = createKnowledgeArticleId('44444444-4444-4444-4444-444444444444');
-const CREATED_BY = createUserId('11111111-1111-1111-1111-111111111111');
-
 function buildExistingArticle(): KnowledgeArticle {
 	const result = KnowledgeArticle.create({
-		id: ARTICLE_ID,
+		id: createKnowledgeArticleId('00000000-0000-0000-0000-000000000001'),
 		title: 'テスト記事',
-		content: 'テスト本文',
+		content: 'テストコンテンツ',
 		sourceType: 'manual',
-		createdBy: CREATED_BY,
+		createdBy: createUserId('user-123'),
 	});
-	if (!result.success) throw new Error(result.error);
+
+	if (!result.success) {
+		throw new Error('Failed to build test fixture');
+	}
+
 	return result.value;
 }
 
@@ -26,7 +27,7 @@ function createMockArticleRepository(
 ): KnowledgeArticleRepository {
 	return {
 		save: vi.fn().mockResolvedValue(undefined),
-		findById: vi.fn().mockResolvedValue(buildExistingArticle()),
+		findById: vi.fn().mockResolvedValue(null),
 		findAll: vi.fn().mockResolvedValue([]),
 		delete: vi.fn().mockResolvedValue(undefined),
 		...overrides,
@@ -45,45 +46,85 @@ function createMockEmbeddingRepository(
 }
 
 describe('DeleteKnowledgeArticleUseCase', () => {
-	it('should delete embeddings then delete article', async () => {
-		const articleRepository = createMockArticleRepository();
+	const articleId = createKnowledgeArticleId('00000000-0000-0000-0000-000000000001');
+
+	it('should delete an existing knowledge article', async () => {
+		const existing = buildExistingArticle();
+		const articleRepository = createMockArticleRepository({
+			findById: vi.fn().mockResolvedValue(existing),
+		});
 		const embeddingRepository = createMockEmbeddingRepository();
 		const useCase = new DeleteKnowledgeArticleUseCase(articleRepository, embeddingRepository);
 
-		await useCase.execute(ARTICLE_ID);
+		await useCase.execute(articleId);
 
-		expect(articleRepository.findById).toHaveBeenCalledOnce();
-		expect(articleRepository.findById).toHaveBeenCalledWith(ARTICLE_ID);
-
-		expect(embeddingRepository.deleteByArticleId).toHaveBeenCalledOnce();
-		expect(embeddingRepository.deleteByArticleId).toHaveBeenCalledWith(ARTICLE_ID);
-
-		expect(articleRepository.delete).toHaveBeenCalledOnce();
-		expect(articleRepository.delete).toHaveBeenCalledWith(ARTICLE_ID);
+		expect(articleRepository.findById).toHaveBeenCalledWith(articleId);
+		expect(embeddingRepository.deleteByArticleId).toHaveBeenCalledWith(articleId);
+		expect(articleRepository.delete).toHaveBeenCalledWith(articleId);
 	});
 
-	it('should throw when article not found', async () => {
+	it('should call deleteByArticleId before delete (order verification)', async () => {
+		const existing = buildExistingArticle();
+		const callOrder: string[] = [];
+		const articleRepository = createMockArticleRepository({
+			findById: vi.fn().mockResolvedValue(existing),
+			delete: vi.fn().mockImplementation(() => {
+				callOrder.push('delete');
+				return Promise.resolve();
+			}),
+		});
+		const embeddingRepository = createMockEmbeddingRepository({
+			deleteByArticleId: vi.fn().mockImplementation(() => {
+				callOrder.push('deleteByArticleId');
+				return Promise.resolve();
+			}),
+		});
+		const useCase = new DeleteKnowledgeArticleUseCase(articleRepository, embeddingRepository);
+
+		await useCase.execute(articleId);
+
+		expect(callOrder).toEqual(['deleteByArticleId', 'delete']);
+	});
+
+	it('should throw when article does not exist', async () => {
 		const articleRepository = createMockArticleRepository({
 			findById: vi.fn().mockResolvedValue(null),
 		});
 		const embeddingRepository = createMockEmbeddingRepository();
 		const useCase = new DeleteKnowledgeArticleUseCase(articleRepository, embeddingRepository);
 
-		await expect(useCase.execute(ARTICLE_ID)).rejects.toThrow(
-			`KnowledgeArticle not found: ${ARTICLE_ID}`,
+		await expect(useCase.execute(articleId)).rejects.toThrow(
+			`KnowledgeArticle not found: ${articleId}`,
 		);
 
 		expect(embeddingRepository.deleteByArticleId).not.toHaveBeenCalled();
 		expect(articleRepository.delete).not.toHaveBeenCalled();
 	});
 
-	it('should propagate repository errors', async () => {
+	it('should propagate errors from embeddingRepository.deleteByArticleId', async () => {
+		const existing = buildExistingArticle();
 		const articleRepository = createMockArticleRepository({
+			findById: vi.fn().mockResolvedValue(existing),
+		});
+		const embeddingRepository = createMockEmbeddingRepository({
+			deleteByArticleId: vi.fn().mockRejectedValue(new Error('DB error')),
+		});
+		const useCase = new DeleteKnowledgeArticleUseCase(articleRepository, embeddingRepository);
+
+		await expect(useCase.execute(articleId)).rejects.toThrow('DB error');
+
+		expect(articleRepository.delete).not.toHaveBeenCalled();
+	});
+
+	it('should propagate errors from articleRepository.delete', async () => {
+		const existing = buildExistingArticle();
+		const articleRepository = createMockArticleRepository({
+			findById: vi.fn().mockResolvedValue(existing),
 			delete: vi.fn().mockRejectedValue(new Error('DB error')),
 		});
 		const embeddingRepository = createMockEmbeddingRepository();
 		const useCase = new DeleteKnowledgeArticleUseCase(articleRepository, embeddingRepository);
 
-		await expect(useCase.execute(ARTICLE_ID)).rejects.toThrow('DB error');
+		await expect(useCase.execute(articleId)).rejects.toThrow('DB error');
 	});
 });

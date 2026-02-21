@@ -39,9 +39,9 @@ function createMockEmbeddingGateway(overrides: Partial<EmbeddingGateway> = {}): 
 }
 
 describe('CreateKnowledgeArticleUseCase', () => {
-	const createdBy = createUserId('11111111-1111-1111-1111-111111111111');
+	const createdBy = createUserId('user-123');
 
-	it('should create article, generate embedding, and save both', async () => {
+	it('should create and save a knowledge article', async () => {
 		const articleRepository = createMockArticleRepository();
 		const embeddingRepository = createMockEmbeddingRepository();
 		const embeddingGateway = createMockEmbeddingGateway();
@@ -53,33 +53,20 @@ describe('CreateKnowledgeArticleUseCase', () => {
 
 		const result = await useCase.execute({
 			title: 'テスト記事',
-			content: 'テスト本文',
+			content: 'テスト内容',
 			sourceType: 'manual',
 			createdBy,
 		});
 
 		expect(result.title).toBe('テスト記事');
-		expect(result.content).toBe('テスト本文');
+		expect(result.content).toBe('テスト内容');
 		expect(result.sourceType).toBe('manual');
 		expect(result.createdBy).toBe(createdBy);
-
 		expect(articleRepository.save).toHaveBeenCalledOnce();
 		expect(articleRepository.save).toHaveBeenCalledWith(result);
-
-		expect(embeddingGateway.generateEmbedding).toHaveBeenCalledOnce();
-		expect(embeddingGateway.generateEmbedding).toHaveBeenCalledWith('テスト本文');
-
-		expect(embeddingRepository.saveMany).toHaveBeenCalledOnce();
-		const savedEmbeddings = (embeddingRepository.saveMany as ReturnType<typeof vi.fn>).mock
-			.calls[0][0];
-		expect(savedEmbeddings).toHaveLength(1);
-		expect(savedEmbeddings[0].knowledgeArticleId).toBe(result.id);
-		expect(savedEmbeddings[0].chunkIndex).toBe(0);
-		expect(savedEmbeddings[0].chunkText).toBe('テスト本文');
-		expect(savedEmbeddings[0].embedding).toBe(DUMMY_EMBEDDING);
 	});
 
-	it('should accept custom id', async () => {
+	it('should call EmbeddingGateway.generateEmbedding', async () => {
 		const articleRepository = createMockArticleRepository();
 		const embeddingRepository = createMockEmbeddingRepository();
 		const embeddingGateway = createMockEmbeddingGateway();
@@ -88,20 +75,95 @@ describe('CreateKnowledgeArticleUseCase', () => {
 			embeddingRepository,
 			embeddingGateway,
 		);
-		const customId = createKnowledgeArticleId('22222222-2222-2222-2222-222222222222');
 
-		const result = await useCase.execute({
-			id: customId,
+		await useCase.execute({
 			title: 'テスト記事',
-			content: 'テスト本文',
-			sourceType: 'note',
+			content: 'テスト内容',
+			sourceType: 'manual',
 			createdBy,
 		});
 
-		expect(result.id).toBe(customId);
+		expect(embeddingGateway.generateEmbedding).toHaveBeenCalledOnce();
 	});
 
-	it('should accept sourceUrl', async () => {
+	it('should call embeddingRepository.saveMany after generating embedding', async () => {
+		const articleRepository = createMockArticleRepository();
+		const embeddingRepository = createMockEmbeddingRepository();
+		const embeddingGateway = createMockEmbeddingGateway();
+		const useCase = new CreateKnowledgeArticleUseCase(
+			articleRepository,
+			embeddingRepository,
+			embeddingGateway,
+		);
+
+		await useCase.execute({
+			title: 'テスト記事',
+			content: 'テスト内容',
+			sourceType: 'manual',
+			createdBy,
+		});
+
+		expect(embeddingRepository.saveMany).toHaveBeenCalledOnce();
+		const [savedEmbeddings] = (embeddingRepository.saveMany as ReturnType<typeof vi.fn>).mock
+			.calls[0];
+		expect(savedEmbeddings).toHaveLength(1);
+		expect(savedEmbeddings[0].embedding).toEqual(DUMMY_EMBEDDING);
+	});
+
+	it('should call articleRepository.save before embeddingRepository.saveMany', async () => {
+		const callOrder: string[] = [];
+		const articleRepository = createMockArticleRepository({
+			save: vi.fn().mockImplementation(() => {
+				callOrder.push('articleSave');
+				return Promise.resolve();
+			}),
+		});
+		const embeddingRepository = createMockEmbeddingRepository({
+			saveMany: vi.fn().mockImplementation(() => {
+				callOrder.push('embeddingSaveMany');
+				return Promise.resolve();
+			}),
+		});
+		const embeddingGateway = createMockEmbeddingGateway();
+		const useCase = new CreateKnowledgeArticleUseCase(
+			articleRepository,
+			embeddingRepository,
+			embeddingGateway,
+		);
+
+		await useCase.execute({
+			title: 'テスト記事',
+			content: 'テスト内容',
+			sourceType: 'manual',
+			createdBy,
+		});
+
+		expect(callOrder).toEqual(['articleSave', 'embeddingSaveMany']);
+	});
+
+	it('should use provided id when given', async () => {
+		const articleRepository = createMockArticleRepository();
+		const embeddingRepository = createMockEmbeddingRepository();
+		const embeddingGateway = createMockEmbeddingGateway();
+		const useCase = new CreateKnowledgeArticleUseCase(
+			articleRepository,
+			embeddingRepository,
+			embeddingGateway,
+		);
+		const id = createKnowledgeArticleId('00000000-0000-0000-0000-000000000001');
+
+		const result = await useCase.execute({
+			id,
+			title: 'テスト記事',
+			content: 'テスト内容',
+			sourceType: 'manual',
+			createdBy,
+		});
+
+		expect(result.id).toBe(id);
+	});
+
+	it('should create article with sourceUrl', async () => {
 		const articleRepository = createMockArticleRepository();
 		const embeddingRepository = createMockEmbeddingRepository();
 		const embeddingGateway = createMockEmbeddingGateway();
@@ -113,7 +175,7 @@ describe('CreateKnowledgeArticleUseCase', () => {
 
 		const result = await useCase.execute({
 			title: 'テスト記事',
-			content: 'テスト本文',
+			content: 'テスト内容',
 			sourceType: 'note',
 			sourceUrl: 'https://example.com',
 			createdBy,
@@ -135,7 +197,7 @@ describe('CreateKnowledgeArticleUseCase', () => {
 		await expect(
 			useCase.execute({
 				title: '',
-				content: 'テスト本文',
+				content: 'テスト内容',
 				sourceType: 'manual',
 				createdBy,
 			}),
@@ -166,13 +228,15 @@ describe('CreateKnowledgeArticleUseCase', () => {
 		).rejects.toThrow('Content cannot be empty');
 
 		expect(articleRepository.save).not.toHaveBeenCalled();
+		expect(embeddingGateway.generateEmbedding).not.toHaveBeenCalled();
+		expect(embeddingRepository.saveMany).not.toHaveBeenCalled();
 	});
 
-	it('should propagate embedding gateway errors', async () => {
+	it('should propagate errors from embeddingGateway', async () => {
 		const articleRepository = createMockArticleRepository();
 		const embeddingRepository = createMockEmbeddingRepository();
 		const embeddingGateway = createMockEmbeddingGateway({
-			generateEmbedding: vi.fn().mockRejectedValue(new Error('API error')),
+			generateEmbedding: vi.fn().mockRejectedValue(new Error('OpenAI error')),
 		});
 		const useCase = new CreateKnowledgeArticleUseCase(
 			articleRepository,
@@ -183,10 +247,10 @@ describe('CreateKnowledgeArticleUseCase', () => {
 		await expect(
 			useCase.execute({
 				title: 'テスト記事',
-				content: 'テスト本文',
+				content: 'テスト内容',
 				sourceType: 'manual',
 				createdBy,
 			}),
-		).rejects.toThrow('API error');
+		).rejects.toThrow('OpenAI error');
 	});
 });

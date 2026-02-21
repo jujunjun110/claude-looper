@@ -45,13 +45,15 @@ export class CreateKnowledgeArticleUseCase {
 		const article = articleResult.value;
 		await this.articleRepository.save(article);
 
-		const embeddingVector = await this.embeddingGateway.generateEmbedding(article.content);
+		const embeddingVector = await this.embeddingGateway.generateEmbedding(
+			`${article.title}\n${article.content}`,
+		);
 
 		const embeddingResult = KnowledgeEmbedding.create({
 			id: createKnowledgeEmbeddingId(randomUUID()),
 			knowledgeArticleId: article.id,
 			chunkIndex: 0,
-			chunkText: article.content,
+			chunkText: `${article.title}\n${article.content}`,
 			embedding: embeddingVector,
 		});
 

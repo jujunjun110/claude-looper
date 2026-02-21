@@ -41,13 +41,15 @@ export class UpdateKnowledgeArticleUseCase {
 
 		await this.embeddingRepository.deleteByArticleId(updated.id);
 
-		const embeddingVector = await this.embeddingGateway.generateEmbedding(updated.content);
+		const embeddingVector = await this.embeddingGateway.generateEmbedding(
+			`${updated.title}\n${updated.content}`,
+		);
 
 		const embeddingResult = KnowledgeEmbedding.create({
 			id: createKnowledgeEmbeddingId(randomUUID()),
 			knowledgeArticleId: updated.id,
 			chunkIndex: 0,
-			chunkText: updated.content,
+			chunkText: `${updated.title}\n${updated.content}`,
 			embedding: embeddingVector,
 		});
 
