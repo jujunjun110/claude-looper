@@ -121,7 +121,7 @@
         "id": "expression-rule-contracts",
         "description": "expression-rule context の契約定義。src/backend/contexts/shared/domain/models/expression-rule-id.model.ts に ExpressionRuleId branded type（createExpressionRuleId ファクトリ + UUID バリデーション）を作成。src/backend/contexts/expression-rule/domain/models/expression-rule.model.ts に ExpressionRule クラスの型定義（ExpressionRuleProps interface: id, ngExpression, recommendedExpression, description, isActive, createdBy, createdAt, updatedAt）と Result 型を定義。src/backend/contexts/expression-rule/domain/gateways/expression-rule.repository.ts に ExpressionRuleRepository interface（save, findById, findAll, findActive, delete）をドメインモデル型のみで定義",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-domain-model",
