@@ -3,7 +3,7 @@
     "milestone": 1,
     "goal": "pnpm workspace + Next.js App Router プロジェクトが起動し、Biome lint / typecheck / build が通り、shadcn/ui + Tailwind CSS でレイアウト（サイドバー + ヘッダー）が表示され、Prisma スキーマに全テーブルが定義されて prisma generate が成功する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build",
-    "done": false,
+    "done": true,
     "tasks": [
       {
         "id": "project-scaffold",
@@ -27,19 +27,19 @@
         "id": "app-layout-shell",
         "description": "apps/content-reviewer/src/app/layout.tsx にルートレイアウトを実装。shadcn/ui の Sidebar コンポーネントを使ったサイドバー（ナビゲーション: ダッシュボード, チェック実行, 表現ルール, ナレッジ）+ ヘッダー（アプリ名表示）のシェル UI を components/layout/ 配下に作成（sidebar-nav.tsx, header.tsx, app-shell.tsx）し、レスポンシブ対応する",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "stub-pages",
         "description": "全ルートのスタブページを作成: app/page.tsx（ダッシュボード）、app/login/page.tsx、app/checks/new/page.tsx、app/checks/[id]/page.tsx、app/rules/page.tsx、app/knowledge/page.tsx、app/knowledge/import/page.tsx。各ページはページタイトルのみ表示する Server Component とし、app-shell レイアウトでラップされた状態にする",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "verify-milestone1",
         "description": "pnpm lint && pnpm typecheck && pnpm build を実行し全て成功することを確認。prisma generate が成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラーがあれば全て修正する",
         "wave": 4,
-        "done": false
+        "done": true
       }
     ]
   },
