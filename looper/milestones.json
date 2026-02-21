@@ -1,56 +1,56 @@
 [
   {
     "milestone": 1,
-    "goal": "pnpm workspace + Next.js App Router プロジェクトが起動し、Biome lint / typecheck / build が通り、shadcn/ui + Tailwind CSS でレイアウト（サイドバー + ヘッダー）が表示され、Prisma スキーマに全7テーブル（users, content_checks, content_segments, check_results, expression_rules, knowledge_articles, knowledge_embeddings）が定義されて migration が適用できる",
+    "goal": "pnpm workspace + Next.js App Router プロジェクトが起動し、Biome lint / typecheck / build が通り、shadcn/ui + Tailwind CSS でレイアウト（サイドバー + ヘッダー）が表示され、Prisma スキーマに全テーブルが定義されて prisma generate が成功する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 2,
-    "goal": "Supabase Auth による Google ログイン・ログアウトが動作し、未認証時は /login にリダイレクトされ、開発環境（NODE_ENV=development）では認証スキップでダッシュボード（空の / ページ）が表示できる",
+    "goal": "Supabase Auth による Google OAuth ログイン・ログアウトが動作し、未認証時は /login にリダイレクトされ、開発環境（NODE_ENV=development）では認証スキップでダミーユーザーとしてダッシュボード（空の / ページ）にアクセスできる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 3,
-    "goal": "domain 層が完成する: ContentCheck / ContentSegment / CheckResult / ExpressionRule / KnowledgeArticle の各ドメインモデルがファクトリメソッドとバリデーションを持ち、ContentReviewService が複数チェック結果を集約でき、AIGateway / EmbeddingGateway / SlackGateway / 各 Repository の interface が定義され、unit test が通る",
-    "verification": "pnpm lint && pnpm typecheck && pnpm test",
+    "goal": "/rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、ExpressionRule ドメインモデル → PrismaExpressionRuleRepository → UseCase（CRUD 4種） → Server Actions → UI の全レイヤーが縦に通って DB に永続化される",
+    "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 4,
-    "goal": "表現ルール管理が動作する: /rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、Supabase Repository 経由で DB に永続化される",
+    "goal": "/knowledge ページでナレッジ記事の一覧表示・手動登録・編集ができ、保存時に OpenAI Embeddings API で Embedding が自動生成されて pgvector に格納され、KnowledgeArticle / KnowledgeEmbedding ドメインモデル → Repository → UseCase → UI が動作する",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 5,
-    "goal": "ナレッジ管理が動作する: /knowledge でナレッジ記事の一覧表示・手動登録・編集ができ、保存時に Embedding が自動生成されて pgvector に格納される。/knowledge/import で note アカウント名を入力すると記事一覧が表示され、選択した記事をボタンで DB 保存できる",
+    "goal": "/knowledge/import で note アカウント名を入力すると NoteScraperGateway 経由で記事一覧が表示され、選択した記事の本文を取得して DB に保存し Embedding を生成できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 6,
-    "goal": "Web からコンテンツチェックが実行できる: /checks/new でテキストを入力して送信すると、LLM による段落分割→5つのチェック（ファクトチェック・ナレッジ整合性・表現ルール適合・炎上リスク・文章クオリティ）が並列実行され、SSE で進捗がリアルタイム表示され、完了後 /checks/[id] で結果詳細を確認できる",
+    "goal": "/checks/new でテキストを入力して送信すると、AIGateway による段落分割→5種のチェック（ファクトチェック・ナレッジ整合性・表現ルール適合・炎上リスク・文章クオリティ）が並列実行され、SSE で進捗がリアルタイム表示され、完了後 /checks/[id] で結果詳細（セグメントごとの指摘・severity・修正提案）を確認できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 7,
-    "goal": "ダッシュボード（/）に過去のチェック履歴一覧が表示され、ソース種別（Slack / Web）・ステータス・実行日時でフィルタリングでき、各行から /checks/[id] の詳細ページに遷移できる",
+    "goal": "ダッシュボード（/）に過去のチェック履歴一覧が表示され、ソース種別（Web / Slack）・ステータス・実行日時でフィルタリングでき、各行クリックで /checks/[id] の詳細ページに遷移できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
     "tasks": []
   },
   {
     "milestone": 8,
-    "goal": "Slack 連携が動作する: /api/slack/events で Slack Events API の Webhook を受信し、@sns-checker メンション時に waitUntil でバックグラウンドチェックを実行し、完了後にスレッドへ結果サマリーと詳細ページのパーマリンクを返信できる",
+    "goal": "/api/slack/events で Slack Events API の Webhook を受信し、Slack 署名検証・url_verification 対応の上、@sns-checker メンション時に waitUntil でバックグラウンドチェックを実行し、完了後にスレッドへ結果サマリーと /checks/[id] のパーマリンクを返信できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "done": false,
     "tasks": []

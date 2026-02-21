@@ -31,7 +31,7 @@ run_claude() {
 	local prompt="$1" logfile="$2"
 	timeout "$SESSION_TIMEOUT" \
 		env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-		claude -p --dangerously-skip-permissions --verbose \
+		claude -p --allow-dangerously-skip-permissions --dangerously-skip-permissions --verbose \
 		--output-format stream-json \
 		"$prompt" > "$logfile" 2>&1
 }
