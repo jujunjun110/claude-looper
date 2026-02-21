@@ -15,13 +15,13 @@
         "id": "shadcn-ui-setup",
         "description": "apps/content-reviewer/ で shadcn/ui を初期化し、components.json を生成。lib/utils.ts に cn() ヘルパーを作成。レイアウトに必要な shadcn/ui コンポーネント（Button, Sheet, Separator, Sidebar 系）を components/ui/ に追加する",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "prisma-schema",
         "description": "apps/content-reviewer/prisma/schema.prisma に全 7 テーブル（users, content_checks, content_segments, check_results, expression_rules, knowledge_articles, knowledge_embeddings）を定義。pgvector 拡張の有効化、全リレーション・インデックス・enum（source, status, check_type, severity, source_type）を含め、prisma generate が成功する状態にする",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "app-layout-shell",

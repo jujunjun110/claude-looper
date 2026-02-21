@@ -5,7 +5,7 @@
 		"lint": "pnpm -r run lint",
 		"typecheck": "pnpm -r run typecheck",
 		"build": "pnpm -r run build",
-		"verify": "pnpm lint && pnpm typecheck && pnpm build"
+		"verify": "pnpm lint && pnpm typecheck && pnpm --filter content-reviewer prisma:generate && pnpm build"
 	},
 	"packageManager": "pnpm@9.15.4"
 }
