@@ -53,6 +53,13 @@ export class KnowledgeEmbedding {
 			return { success: false, error: 'Embedding must not be empty' };
 		}
 
+		if (props.embedding.length !== 1536) {
+			return {
+				success: false,
+				error: `Embedding must have 1536 dimensions, got ${props.embedding.length}`,
+			};
+		}
+
 		const now = new Date();
 		return {
 			success: true,
