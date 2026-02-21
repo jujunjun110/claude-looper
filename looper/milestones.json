@@ -48,7 +48,62 @@
     "goal": "Supabase Auth による Google OAuth ログイン・ログアウトが動作し、未認証時は /login にリダイレクトされ、開発環境（NODE_ENV=development）では認証スキップでダミーユーザーとしてダッシュボード（空の / ページ）にアクセスできる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "done": false,
-    "tasks": []
+    "tasks": [
+      {
+        "id": "auth-deps-and-test-setup",
+        "description": "apps/content-reviewer/package.json に @supabase/supabase-js, @supabase/ssr, vitest を追加し pnpm install を実行。apps/content-reviewer/vitest.config.ts を作成（src/ 配下のテストを対象、パスエイリアス @/ を設定）。apps/content-reviewer/package.json に test script（vitest run）を追加。ルート package.json に test script（pnpm -r run test）を追加",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "auth-contracts",
+        "description": "auth context と shared context の型定義を作成。src/backend/contexts/shared/domain/models/user-id.model.ts（UserId branded type）、src/backend/contexts/shared/domain/models/email.model.ts（Email 値オブジェクト、バリデーション付き）。src/backend/contexts/auth/domain/models/user.model.ts の interface/型定義（id, email, name, avatarUrl, createdAt, updatedAt）。src/backend/contexts/auth/domain/gateways/auth.gateway.ts（AuthGateway interface: getCurrentUser, signInWithGoogle, signOut, onAuthStateChange）。src/backend/contexts/auth/domain/gateways/user.repository.ts（UserRepository interface: findById, findByEmail, upsert）",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "supabase-client-init",
+        "description": "src/backend/contexts/shared/infrastructure/db/supabase-server-client.ts に Next.js Server Component / Server Action 用の Supabase クライアント生成関数を実装（@supabase/ssr の createServerClient + cookies()）。src/backend/contexts/shared/infrastructure/db/supabase-browser-client.ts にブラウザ用の Supabase クライアント生成関数を実装（@supabase/ssr の createBrowserClient）。src/backend/contexts/shared/infrastructure/db/supabase-middleware-client.ts に middleware 用のクライアント生成関数を実装（NextRequest/NextResponse を受け取り cookie を操作）。環境変数型定義を src/lib/env.ts に作成（NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "auth-domain-models",
+        "description": "src/backend/contexts/auth/domain/models/user.model.ts に User Rich Domain Model を実装。ファクトリメソッド create(id, email, name, avatarUrl?) でバリデーション実施（Email 値オブジェクト使用）。fromSupabaseUser(supabaseUser) でSupabase Auth ユーザーからの変換。ダミーユーザー生成用の createDummy() static メソッド（開発環境スキップ用、固定 UUID + dummy@example.com）。src/backend/contexts/shared/domain/models/ の UserId, Email 値オブジェクトの実装（ファクトリメソッド + バリデーション）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "auth-domain-tests",
+        "description": "src/backend/contexts/auth/domain/models/__tests__/user.model.test.ts に User モデルのユニットテスト（create 正常系、バリデーションエラー、createDummy、fromSupabaseUser）。src/backend/contexts/shared/domain/models/__tests__/email.model.test.ts に Email 値オブジェクトのテスト。src/backend/contexts/shared/domain/models/__tests__/user-id.model.test.ts に UserId のテスト。vitest で全テスト pass することを確認",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "auth-backend-layers",
+        "description": "auth context の infrastructure〜presentation 全層を実装。src/backend/contexts/auth/infrastructure/supabase-auth.gateway.ts（AuthGateway の Supabase 実装: getCurrentUser でセッション取得 → User モデル変換、signInWithGoogle で OAuth リダイレクト URL 生成、signOut）。src/backend/contexts/auth/infrastructure/repositories/prisma-user.repository.ts（UserRepository の Prisma 実装: findById, findByEmail, upsert で Prisma User ↔ ドメイン User 変換）。src/backend/contexts/auth/application/usecases/get-current-user.usecase.ts, sign-in.usecase.ts, sign-out.usecase.ts, sync-user.usecase.ts（ログイン後に Supabase auth.users → アプリ users テーブルに同期）。src/backend/contexts/auth/presentation/composition/auth.composition.ts, actions/sign-in.action.ts, actions/sign-out.action.ts, loaders/current-user.loader.ts",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "auth-middleware-and-callback",
+        "description": "apps/content-reviewer/src/middleware.ts を作成。supabase-middleware-client でセッションを検証し、未認証時は /login にリダイレクト。/login, /api/auth/callback, _next/static, _next/image, favicon.ico はスキップ。NODE_ENV=development 時は認証チェックをスキップしダミーユーザーとして通過。src/app/api/auth/callback/route.ts を作成（Supabase SSR の code exchange: URL パラメータの code を exchangeCodeForSession で処理し / にリダイレクト）",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "login-page-ui",
+        "description": "src/app/login/page.tsx を更新し、Google OAuth ログインボタン（shadcn/ui Button）を配置。sign-in.action.ts の Server Action を呼び出して Supabase Auth の Google OAuth フローを開始。ログイン成功後のリダイレクト処理。(app)/layout.tsx にログアウトボタンを追加（ヘッダー右側にユーザー名表示 + ログアウトボタン、current-user.loader.ts でユーザー情報取得、sign-out.action.ts でログアウト実行）",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "verify-milestone2",
+        "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test を実行し全て成功することを確認。開発環境（NODE_ENV=development）で認証スキップが動作し / にアクセスできることを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗があれば全て修正する",
+        "wave": 4,
+        "done": false
+      }
+    ]
   },
   {
     "milestone": 3,
