@@ -115,7 +115,7 @@
     "milestone": 3,
     "goal": "/rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、ExpressionRule ドメインモデル → PrismaExpressionRuleRepository → UseCase（CRUD 4種） → Server Actions → UI の全レイヤーが縦に通って DB に永続化される",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
-    "done": false,
+    "done": true,
     "tasks": [
       {
         "id": "expression-rule-contracts",
@@ -157,25 +157,25 @@
         "id": "expression-rule-presentation",
         "description": "expression-rule context の presentation 層を実装。src/backend/contexts/expression-rule/presentation/composition/expression-rule.composition.ts に createListExpressionRulesUseCase / createCreateExpressionRuleUseCase / createUpdateExpressionRuleUseCase / createDeleteExpressionRuleUseCase ファクトリ関数（PrismaExpressionRuleRepository + prisma を注入）。src/backend/contexts/expression-rule/presentation/loaders/expression-rules.loader.ts に loadExpressionRules()（UseCase 経由で一覧取得）。src/backend/contexts/expression-rule/presentation/actions/create-expression-rule.action.ts、update-expression-rule.action.ts、delete-expression-rule.action.ts に 'use server' Server Actions（FormData → UseCase 呼び出し → revalidatePath('/rules')）。開発環境ではダミーユーザー ID を使用",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-ui",
         "description": "shadcn/ui コンポーネント追加（Dialog, Table, Label, Textarea, Badge が未追加なら追加）。src/components/rules/expression-rule-table.tsx（'use client'、一覧テーブル: NG表現・推奨表現・補足説明・ステータス・操作ボタン）、expression-rule-form-dialog.tsx（'use client'、新規登録/編集兼用の Dialog フォーム: ngExpression, recommendedExpression, description 入力 → Server Action 呼び出し）、delete-expression-rule-button.tsx（'use client'、削除確認付きボタン → Server Action 呼び出し）を作成。src/app/(app)/rules/page.tsx を更新し、loadExpressionRules() で一覧取得 → ExpressionRuleTable に props 渡し + 新規登録ボタン配置",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "verify-milestone3",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
         "wave": 4,
-        "done": false
+        "done": true
       },
       {
         "id": "fix-create-usecase-test-type-error",
         "description": "typecheck エラーの修正。原因: test/unit/contexts/expression-rule/application/usecases/create-expression-rule.usecase.test.ts が CreateExpressionRuleInput に 'id' フィールドを渡しているが、最終的な UseCase 実装（UUID自動生成方式）では 'id' が input に含まれない。コンフリクト解決の結果 expression-rule-usecase-tests ブランチの実装（UUID自動生成）を採用したが、expression-rule-usecases ブランチのテストファイル（test/unit/ 配下）が古い設計のままになっている。修正方針: test/unit/.../ create-expression-rule.usecase.test.ts の各 execute() 呼び出しから 'id' フィールドを削除し、result.id のアサーションは UUID 形式（expect(result.id).toMatch(/^[0-9a-f-]{36}$/)）に変更する",
         "wave": 5,
-        "done": false
+        "done": true
       }
     ]
   },
