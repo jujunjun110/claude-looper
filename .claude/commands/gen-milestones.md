@@ -19,7 +19,11 @@ Task の細分化は Milestone 着手時に計画セッションが行うため�
 ### 手順
 
 1. 引数で指定されたドキュメントを読む
-2. docs/ 配下に関連ドキュメントがあれば読む
+2. docs/ 配下のドキュメントを読む
+   - [docs/architecture.md](docs/architecture.md): アーキテクチャ
+   - [docs/frontend.md](docs/frontend.md): フロントエンド
+   - [docs/infrastructure.md](docs/infrastructure.md): インフラストラクチャ
+   - [docs/quality.md](docs/quality.md): 品質
 3. CLAUDE.md を読む
 4. 既存コードがあれば Glob/Grep で現状を把握する
 5. 既存の looper/milestones.json があればアーカイブする（後述）

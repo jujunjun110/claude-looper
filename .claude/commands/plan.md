@@ -20,21 +20,23 @@ description: 設計ドキュメントを作成する (project)
 
    目的が明確でない場合は、必ずユーザーに質問して確認を取ること。設計ドキュメントの冒頭に「目的」セクションとして記載する。
 
-3. **関連コード・ドキュメントの調査**: 設計に必要な既存コードやドキュメントを読み込み、現状を理解する。設計対象に応じて以下を参照する。
-   - バックエンド関連の場合:
-     - [docs/backend-architecture-guide.md](docs/backend-architecture-guide.md): バックエンドのアーキテクチャルール
-     - [docs/backend-testing-guide.md](docs/backend-testing-guide.md): テストのガイドライン
-   - ショート動画生成機能関連の場合:
-     - [docs/shorts-gen-feature-spec.md](docs/shorts-gen-feature-spec.md): 機能仕様
-     - [docs/shorts-gen-implementation-plan.md](docs/shorts-gen-implementation-plan.md): 実装計画
+3. **関連コード・ドキュメントの調査**: 設計に必要な既存コードやドキュメントを読み込み、現状を理解する。以下のドキュメントを参照する。
+   - [docs/architecture.md](docs/architecture.md): アーキテクチャ
+   - [docs/frontend.md](docs/frontend.md): フロントエンド
+   - [docs/infrastructure.md](docs/infrastructure.md): インフラストラクチャ
+   - [docs/quality.md](docs/quality.md): 品質
 
-4. **ファイル作成**: 設計ドキュメントを作成する。
+4. **スコープ確認**: 設計内容に以下が含まれる場合、ファイル作成前にユーザーの確認を取る。
+   - ページの作成を伴うとき: 作成するページの一覧をURLパス付きで提示し、OKか確認する
+   - テーブルの作成・更新を伴うとき: 変更するテーブルの一覧を提示し、OKか確認する
+
+5. **ファイル作成**: 設計ドキュメントを作成する。
    - 保存場所: `docs/tasks/` 以下
    - ファイル名: `YYYYMMDD_HHMM_{日本語の作業内容}.md`
    - 日時は `TZ=Asia/Tokyo date +%Y%m%d_%H%M` で取得する
    - 例: `docs/tasks/20250815_1430_ユーザー認証システム設計.md`
 
-6. **整合性チェック**: バックエンド関連の設計の場合、作成したドキュメントが [docs/backend-architecture-guide.md](docs/backend-architecture-guide.md) のアーキテクチャルールと矛盾していないかダブルチェックする。矛盾があれば修正する。
+6. **整合性チェック**: 作成したドキュメントが [docs/architecture.md](docs/architecture.md) のアーキテクチャルールと矛盾していないかダブルチェックする。矛盾があれば修正する。
 
 7. **完了報告**: 作成した設計ドキュメントのパスを報告し、ユーザーのレビューを待つ。そのまま実装に進んではならない。
 
