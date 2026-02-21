@@ -1,12 +1,10 @@
 # claude-looper
 
-Claude Code で「計画→実装→検証」の自律開発ループを回すサンプル実装。
+Claude Code による自律開発ループ。3 エージェント（計画→並列実装→検証）が Milestone 単位で開発を進めます。
 
 ブログ記事の補足資料として公開しています。汎用ライブラリではありません。自分のプロジェクトに合わせて自由に改変してください。
 
-## 何をするものか
-
-`looper/run.sh` を実行すると、3 つの Claude Code エージェントが協調して開発を進めます。
+## 仕組み
 
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
@@ -14,65 +12,23 @@ Claude Code で「計画→実装→検証」の自律開発ループを回す�
 │ タスク設計 │     │ 並列実装  │     │ マージ検証 │
 └──────────┘     └──────────┘     └──────────┘
                        │                │
-                       │          失敗時 fix タスク生成
+                       │          失敗時 fix タスク追加
                        │                │
                        ◀────────────────┘
 ```
 
-- **Planner**: Milestone のゴールをタスクに分解（コードは書かない）
-- **Builder**: 1 タスク = 1 セッション。Git worktree で隔離して並列実行
-- **Verifier**: ブランチをマージして品質検証。失敗したら fix タスクを追加してリトライ
+| エージェント | 役割 |
+|---|---|
+| **Planner** | Milestone のゴールを Wave 構造のタスクに分解する。コードは書かない |
+| **Builder** | 1 タスク = 1 セッション。Git worktree で隔離して最大 5 並列で実行 |
+| **Verifier** | ブランチを直列マージし品質検証。失敗時は fix タスクを生成してリトライ |
 
-スクリプト（bash）は worktree の作成とプロセス起動だけを担当し、判断は全てエージェントが行います。
+スクリプト（bash）が担うのは worktree 作成とプロセス起動だけ。判断は全てエージェントが行います。
 
-## 前提
+### Milestone と Wave
 
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
-- jq
-- Git
-
-## 使い方
-
-```bash
-# 1. milestones.json にゴールを定義
-# 2. 実行
-bash looper/run.sh
-
-# ドライラン（実行計画の確認のみ）
-bash looper/run.sh --dry-run
-
-# 別ターミナルで監視
-watch -n3 bash looper/monitor.sh
-```
-
-## ファイル構成
-
-```
-looper/
-├── run.sh              # オーケストレーション
-├── monitor.sh          # リアルタイム監視
-├── milestones.json     # Milestone / Task の定義と進捗
-├── prompts/            # エージェントプロンプト
-│   ├── planner.md
-│   ├── builder.md
-│   └── verifier.md
-├── docs/               # 技術スタック共通の設計規約
-└── sessions/           # Builder のセッションログ
-
-.claude/
-├── settings.json       # Biome 自動フォーマット hook
-└── commands/
-    └── gen-milestones.md  # /gen-milestones スラッシュコマンド
-```
-
-詳細は [looper/README.md](looper/README.md) を参照。
-
-## 仕組みの概要
-
-### Milestone × Wave
-
-- **Milestone**: 機能の大きな塊。直列に進む（M1 完了 → M2 開始）
-- **Wave**: Milestone 内の依存順序。同 Wave のタスクは並列実行される
+- **Milestone** — 「1 つの機能が動く」単位。直列に進む（M1 完了 → M2 開始）
+- **Wave** — Milestone 内の依存順序。同 Wave のタスクは Git worktree で並列実行される
 
 ```
 Milestone 1
@@ -83,18 +39,84 @@ Milestone 2
   ...
 ```
 
-### 並列化
-
-同 Wave の Builder タスクは別々の Git worktree で同時に動きます。ファイルシステムレベルで隔離されるため、コンフリクトが起きません。
-
 ### 自己修復
 
 Verifier の検証が失敗すると fix タスクが自動生成され、次のラウンドで Builder がリトライします。
 
+## 使い方
+
+### 1. 設計ドキュメントを作成する
+
+Claude Code で `/plan` コマンドを実行し、作りたいものを伝えます。
+
+```
+/plan 以下のアプリケーションの設計を行って。...（要件を記述）
+```
+
+入力例は [initial_prompt_sample.md](initial_prompt_sample.md) を参照。出力は `docs/tasks/` に保存されます。
+
+### 2. Milestone を生成する
+
+`/gen-milestones` コマンドに設計ドキュメントを渡し、`looper/milestones.json` を生成します。
+
+```
+/gen-milestones docs/tasks/設計ドキュメント.md
+```
+
+### 3. ループを実行する
+
+```bash
+bash looper/run.sh
+
+# ドライラン（実行計画の確認のみ）
+bash looper/run.sh --dry-run
+
+# 別ターミナルで監視
+watch -n3 bash looper/monitor.sh
+```
+
+## 前提
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
+- jq
+- Git
+- [Playwright MCP](https://github.com/anthropics/playwright-mcp)（任意 — UI 動作確認・録画に使用）
+
+## ファイル構成
+
+```
+looper/
+├── run.sh              # オーケストレーション（worktree 作成・プロセス起動）
+├── monitor.sh          # Builder セッションのリアルタイム監視
+├── milestones.json     # Milestone / Task の定義と進捗
+├── prompts/
+│   ├── planner.md      # Planner エージェントプロンプト
+│   ├── builder.md      # Builder エージェントプロンプト
+│   └── verifier.md     # Verifier エージェントプロンプト
+├── output/             # Verifier が保存する UI 動作確認の録画
+└── sessions/           # Builder のセッションログ
+
+docs/                   # 設計規約（エージェントが毎セッション読む）
+├── architecture.md     # DDD 4層・依存ルール・命名規約
+├── frontend.md         # フロントエンド規約
+├── infrastructure.md   # インフラ規約
+└── quality.md          # 品質規約
+
+.claude/commands/       # Claude Code スラッシュコマンド
+├── plan.md             # /plan — 設計ドキュメント作成
+└── gen-milestones.md   # /gen-milestones — Milestone 生成
+```
+
+## カスタマイズ
+
+このリポジトリをフォークして以下を自分のプロジェクトに合わせてください:
+
+- **`docs/`** — 設計規約。DDD・Next.js 等は筆者のプロジェクト向けの例です
+- **`looper/prompts/`** — エージェントプロンプト。検証コマンドやコミットメッセージ規約など
+- **`CLAUDE.md`** — プロジェクト固有のコーディング規約
+
 ## 注意事項
 
-- これはサンプルコードです。プロダクション利用を想定したものではありません
-- `looper/docs/` 内の設計規約（DDD、Next.js 等）は筆者のプロジェクト向けの例です。自分のスタックに合わせて書き換えてください
 - エージェントは `--dangerously-skip-permissions` で動作します。信頼できる環境でのみ実行してください
 - Claude Code の API 利用料が発生します
 

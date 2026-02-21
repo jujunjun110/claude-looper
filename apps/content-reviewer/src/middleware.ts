@@ -2,7 +2,7 @@ import { createSupabaseMiddlewareClient } from '@/backend/contexts/shared/infras
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/api/auth/callback'];
+const PUBLIC_PATHS = ['/login', '/auth/callback'];
 const STATIC_PREFIXES = ['/_next/static', '/_next/image'];
 const STATIC_FILES = ['/favicon.ico'];
 
