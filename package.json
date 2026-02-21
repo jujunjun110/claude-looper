@@ -7,7 +7,7 @@
 		"build": "pnpm -r run build",
 		"test": "pnpm -r run test",
 		"e2e": "pnpm --filter content-reviewer exec playwright test",
-		"verify": "pnpm lint && pnpm --filter content-reviewer prisma:generate && pnpm typecheck && pnpm build && pnpm test",
+		"verify": "pnpm install && pnpm lint && pnpm --filter content-reviewer prisma:generate && pnpm typecheck && pnpm build && pnpm test",
 		"verify:full": "pnpm verify && pnpm e2e"
 	},
 	"packageManager": "pnpm@9.15.4"

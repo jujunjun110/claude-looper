@@ -319,25 +319,25 @@
         "id": "content-check-domain-models",
         "description": "content-check context のドメインモデル実装とドメインサービス。(1) src/backend/contexts/content-check/domain/models/content-check.model.ts を実装: private constructor + create(source, originalText, userId?) で空文字・30000字上限バリデーション（Result型返却）・reconstruct() で DB復元・startProcessing()/complete()/fail() でステータス遷移を実装。(2) content-segment.model.ts: create(contentCheckId, segmentIndex, text) + reconstruct() を実装。(3) check-result.model.ts: create(segmentId, checkType, severity, message, suggestion?) + reconstruct() を実装。(4) src/backend/contexts/content-check/domain/services/content-review.service.ts を新規作成: ContentReviewService クラス（summarize(results: CheckResult[]): {error: number, warning: number, info: number} で severity 別カウントを集計）。(5) src/backend/contexts/content-check/domain/models/__tests__/ に各モデルのユニットテスト（create 正常系・バリデーションエラー・ステータス遷移）を追加",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "anthropic-ai-gateway",
         "description": "Anthropic Claude API の AIGateway 実装。apps/content-reviewer/package.json に @anthropic-ai/sdk を追加し pnpm install を実行。src/backend/contexts/shared/infrastructure/ai/anthropic-ai.gateway.ts に AnthropicAIGateway implements AIGateway を実装: generate() は messages.create() で claude-sonnet-4-6 を呼び出し最初の text ブロックを返す、generateWithWebSearch() は web_search_20250305 ツールを tools に渡して messages.create() を呼び出し最終 text ブロックを返す、generateStream() は messages.stream() を使い AsyncGenerator で text_delta チャンクを yield する。ANTHROPIC_API_KEY 環境変数を利用。src/backend/contexts/shared/infrastructure/ai/__tests__/anthropic-ai.gateway.test.ts に @anthropic-ai/sdk をモックしたユニットテスト（generate・generateWithWebSearch の正常系）を追加",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "content-check-repositories",
         "description": "content-check context の Prisma Repository 実装3種。src/backend/contexts/content-check/infrastructure/repositories/ に以下を新規作成: (1) prisma-content-check.repository.ts: PrismaContentCheckRepository implements ContentCheckRepository（save は upsert、findById、findAll(filter) は ContentCheckFilter に応じた where 条件付き検索 + toDomain/toPrisma 変換）。(2) prisma-content-segment.repository.ts: PrismaContentSegmentRepository implements ContentSegmentRepository（saveMany は createMany、findByContentCheckId + toDomain 変換）。(3) prisma-check-result.repository.ts: PrismaCheckResultRepository implements CheckResultRepository（saveMany は createMany、findBySegmentId、findByContentCheckId + toDomain 変換）。各 Repository は共有 prisma-client.ts の PrismaClient を利用し Prisma 型 ↔ ドメインモデル変換を行う",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "cross-context-providers-impl",
         "description": "content-check context 内から他 Context のデータを参照するための Gateway 実装2種（Context 間の直接 import を回避）。(1) src/backend/contexts/content-check/infrastructure/prisma-expression-rule.provider.ts: PrismaExpressionRuleProvider implements ExpressionRuleProvider。findActiveRules() で prisma.expressionRule.findMany({ where: { isActive: true } }) を直接呼び出し { ngExpression, recommendedExpression }[] に変換して返す。expression-rule context は一切 import しない。(2) src/backend/contexts/content-check/infrastructure/prisma-knowledge-search.gateway.ts: PrismaKnowledgeSearchGateway implements KnowledgeSearchGateway。searchSimilar(embedding, limit) で pgvector の <-> コサイン距離演算子を使った $queryRaw で knowledge_embeddings テーブルを検索し { chunkText: string }[] を返す。knowledge context は一切 import しない",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "execute-content-check-usecase",
@@ -379,6 +379,12 @@
         "id": "verify-milestone6",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
         "wave": 6,
+        "done": false
+      },
+      {
+        "id": "fix-knowledge-import-error-handling",
+        "description": "E2E テスト knowledge-import.spec.ts が失敗する。根本原因: apps/content-reviewer/src/app/(app)/knowledge/import/page.tsx が loadNoteArticles() を呼び出す際にエラーハンドリングがなく、NoteScraperHttpGateway.fetchArticleList() が HTTP 404 を返すと未処理エラーになりページクラッシュする。修正方針: page.tsx の loadNoteArticles() 呼び出しを try-catch で囲み、エラー時は articles=[] または errorMessage を state にセットして「記事が見つかりませんでした。」または「取得に失敗しました。」を表示する。またはローダー側でエラーをキャッチして空配列を返す。E2E テストが期待している getByRole('table').or(getByText('記事が見つかりませんでした。')) が visible になれば pass する",
+        "wave": 7,
         "done": false
       }
     ]
