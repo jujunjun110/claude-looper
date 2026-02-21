@@ -9,7 +9,7 @@
         "id": "project-scaffold",
         "description": "pnpm workspace + Next.js App Router プロジェクトの初期構築。ルート package.json（workspace scripts: lint, typecheck, build）、pnpm-workspace.yaml、apps/content-reviewer/ 配下に package.json・next.config.ts・tsconfig.json・tailwind.config.ts・postcss.config.mjs・biome.json を作成し、Tailwind CSS v4 + PostCSS を設定、apps/content-reviewer/src/app/globals.css に Tailwind ディレクティブを記述、最小限の app/layout.tsx と app/page.tsx で pnpm build が通る状態にする",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "shadcn-ui-setup",
