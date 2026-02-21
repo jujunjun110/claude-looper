@@ -83,24 +83,30 @@
         "id": "auth-backend-layers",
         "description": "auth context の infrastructure〜presentation 全層を実装。src/backend/contexts/auth/infrastructure/supabase-auth.gateway.ts（AuthGateway の Supabase 実装: getCurrentUser でセッション取得 → User モデル変換、signInWithGoogle で OAuth リダイレクト URL 生成、signOut）。src/backend/contexts/auth/infrastructure/repositories/prisma-user.repository.ts（UserRepository の Prisma 実装: findById, findByEmail, upsert で Prisma User ↔ ドメイン User 変換）。src/backend/contexts/auth/application/usecases/get-current-user.usecase.ts, sign-in.usecase.ts, sign-out.usecase.ts, sync-user.usecase.ts（ログイン後に Supabase auth.users → アプリ users テーブルに同期）。src/backend/contexts/auth/presentation/composition/auth.composition.ts, actions/sign-in.action.ts, actions/sign-out.action.ts, loaders/current-user.loader.ts",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "auth-middleware-and-callback",
-        "description": "apps/content-reviewer/src/middleware.ts を作成。supabase-middleware-client でセッションを検証し、未認証時は /login にリダイレクト。/login, /api/auth/callback, _next/static, _next/image, favicon.ico はスキップ。NODE_ENV=development 時は認証チェックをスキップしダミーユーザーとして通過。src/app/api/auth/callback/route.ts を作成（Supabase SSR の code exchange: URL パラメータの code を exchangeCodeForSession で処理し / にリダイレクト）",
+        "description": "apps/content-reviewer/src/middleware.ts を作成。supabase-middleware-client でセッションを検証し、未認証時は /login にリダイレクト。/login, /auth/callback, _next/static, _next/image, favicon.ico はスキップ。NODE_ENV=development 時は認証チェックをスキップしダミーユーザーとして通過。src/app/auth/callback/route.ts を作成（Supabase SSR の code exchange: URL パラメータの code を exchangeCodeForSession で処理し / にリダイレクト）",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "login-page-ui",
         "description": "src/app/login/page.tsx を更新し、Google OAuth ログインボタン（shadcn/ui Button）を配置。sign-in.action.ts の Server Action を呼び出して Supabase Auth の Google OAuth フローを開始。ログイン成功後のリダイレクト処理。(app)/layout.tsx にログアウトボタンを追加（ヘッダー右側にユーザー名表示 + ログアウトボタン、current-user.loader.ts でユーザー情報取得、sign-out.action.ts でログアウト実行）",
         "wave": 3,
+        "done": true
+      },
+      {
+        "id": "fix-dev-mode-dummy-user",
+        "description": "開発環境（NODE_ENV=development）で / にアクセスすると Missing environment variable: NEXT_PUBLIC_SUPABASE_URL エラーが発生する。原因: (app)/layout.tsx が loadCurrentUser() → createGetCurrentUserUseCase() → createSupabaseServerClient() を呼び出し、Supabase 環境変数が未設定のためクラッシュする。修正方針: current-user.loader.ts の loadCurrentUser() 先頭で NODE_ENV === 'development' を判定し、User.createDummy() を返すことで Supabase 接続をバイパスする。同様に sign-in.action.ts と sign-out.action.ts にも開発環境ガードを追加する（開発環境ではリダイレクトのみ）",
+        "wave": 5,
         "done": false
       },
       {
         "id": "verify-milestone2",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test を実行し全て成功することを確認。開発環境（NODE_ENV=development）で認証スキップが動作し / にアクセスできることを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗があれば全て修正する",
-        "wave": 4,
+        "wave": 6,
         "done": false
       }
     ]
