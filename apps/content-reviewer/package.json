@@ -8,9 +8,11 @@
 		"start": "next start",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"prisma:generate": "prisma generate"
 	},
 	"dependencies": {
+		"@prisma/client": "5.22.0",
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@radix-ui/react-separator": "^1.1.8",
 		"@radix-ui/react-slot": "^1.2.4",
@@ -26,6 +28,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"prisma": "5.22.0",
 		"@tailwindcss/postcss": "^4.1.7",
 		"@types/node": "^22.15.21",
 		"@types/react": "^19.1.4",

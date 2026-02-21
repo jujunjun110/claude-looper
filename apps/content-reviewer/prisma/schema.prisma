@@ -1,0 +1,161 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector", schema: "public")]
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Source {
+  web
+  slack
+}
+
+enum Status {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum CheckType {
+  fact_check
+  knowledge_consistency
+  expression_rule
+  risk_assessment
+  quality
+}
+
+enum Severity {
+  info
+  warning
+  error
+}
+
+enum SourceType {
+  manual
+  note
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  name      String
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  contentChecks     ContentCheck[]
+  expressionRules   ExpressionRule[]
+  knowledgeArticles KnowledgeArticle[]
+
+  @@map("users")
+}
+
+model ContentCheck {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  source         Source
+  originalText   String   @map("original_text")
+  status         Status   @default(pending)
+  slackChannelId String?  @map("slack_channel_id")
+  slackThreadTs  String?  @map("slack_thread_ts")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user     User?            @relation(fields: [userId], references: [id])
+  segments ContentSegment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("content_checks")
+}
+
+model ContentSegment {
+  id             String   @id @default(uuid()) @db.Uuid
+  contentCheckId String   @map("content_check_id") @db.Uuid
+  segmentIndex   Int      @map("segment_index")
+  text           String
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  contentCheck ContentCheck  @relation(fields: [contentCheckId], references: [id])
+  checkResults CheckResult[]
+
+  @@index([contentCheckId])
+  @@map("content_segments")
+}
+
+model CheckResult {
+  id               String    @id @default(uuid()) @db.Uuid
+  contentSegmentId String    @map("content_segment_id") @db.Uuid
+  checkType        CheckType @map("check_type")
+  severity         Severity
+  message          String
+  suggestion       String?
+  metadata         Json?     @db.JsonB
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  contentSegment ContentSegment @relation(fields: [contentSegmentId], references: [id])
+
+  @@index([contentSegmentId])
+  @@index([checkType])
+  @@map("check_results")
+}
+
+model ExpressionRule {
+  id                      String   @id @default(uuid()) @db.Uuid
+  ngExpression            String   @map("ng_expression")
+  recommendedExpression   String   @map("recommended_expression")
+  description             String?
+  isActive                Boolean  @default(true) @map("is_active")
+  createdBy               String   @map("created_by") @db.Uuid
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@index([isActive])
+  @@map("expression_rules")
+}
+
+model KnowledgeArticle {
+  id         String     @id @default(uuid()) @db.Uuid
+  title      String
+  content    String
+  sourceUrl  String?    @map("source_url")
+  sourceType SourceType @map("source_type")
+  createdBy  String     @map("created_by") @db.Uuid
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  creator    User                  @relation(fields: [createdBy], references: [id])
+  embeddings KnowledgeEmbedding[]
+
+  @@index([sourceType])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeEmbedding {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  knowledgeArticleId String                       @map("knowledge_article_id") @db.Uuid
+  chunkIndex         Int                          @map("chunk_index")
+  chunkText          String                       @map("chunk_text")
+  embedding          Unsupported("vector(1536)")
+  createdAt          DateTime                     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime                     @updatedAt @map("updated_at") @db.Timestamptz
+
+  knowledgeArticle KnowledgeArticle @relation(fields: [knowledgeArticleId], references: [id])
+
+  @@index([knowledgeArticleId])
+  @@map("knowledge_embeddings")
+}
