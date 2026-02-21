@@ -258,7 +258,7 @@
         "id": "note-scraper-contract",
         "description": "src/backend/contexts/knowledge/domain/gateways/note-scraper.gateway.ts を新規作成し、NoteArticleSummary 型（title: string, url: string, publishedAt: Date）と NoteScraperGateway interface（fetchArticleList(accountName: string): Promise<NoteArticleSummary[]>、fetchArticleContent(url: string): Promise<{ title: string; content: string }>）を定義する",
         "wave": 1,
-        "done": false
+        "done": true
       },
       {
         "id": "note-scraper-gateway-impl",
@@ -294,6 +294,12 @@
         "id": "verify-milestone5",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
         "wave": 5,
+        "done": false
+      },
+      {
+        "id": "fix-domain-model-serialization",
+        "description": "E2E テストが 'Only plain objects, and a few built-ins, can be passed to Client Components from Server Components. Classes or null prototypes are not supported.' エラーで失敗する。原因: loadExpressionRules()（expression-rule.loader.ts）と loadKnowledgeArticles()（knowledge-articles.loader.ts）が ExpressionRule / KnowledgeArticle クラスインスタンスをそのまま返しており、page.tsx が Client Component（ExpressionRuleTable, KnowledgeArticleTable）に props として渡す際に Next.js のシリアライズエラーが発生する。修正方針: 各 loader で Domain Model を plain object の DTO に変換して返す。(1) ExpressionRuleProps に相当する plain type（ExpressionRuleDto）を定義し、expression-rule.loader.ts で ExpressionRule インスタンスを { id: rule.id, ngExpression: rule.ngExpression, ... } のスプレッド/明示変換でプレーンオブジェクトに変換して返す。(2) 同様に KnowledgeArticleDto を定義し、knowledge-articles.loader.ts でも変換する。(3) ExpressionRuleTable と KnowledgeArticleTable の props 型を DTO 型に変更し、型整合性を確認する。DTO 型は presentation 層（loaders ディレクトリ内または別の types ファイル）に配置する",
+        "wave": 6,
         "done": false
       }
     ]
