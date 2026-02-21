@@ -65,19 +65,19 @@
         "id": "supabase-client-init",
         "description": "src/backend/contexts/shared/infrastructure/db/supabase-server-client.ts に Next.js Server Component / Server Action 用の Supabase クライアント生成関数を実装（@supabase/ssr の createServerClient + cookies()）。src/backend/contexts/shared/infrastructure/db/supabase-browser-client.ts にブラウザ用の Supabase クライアント生成関数を実装（@supabase/ssr の createBrowserClient）。src/backend/contexts/shared/infrastructure/db/supabase-middleware-client.ts に middleware 用のクライアント生成関数を実装（NextRequest/NextResponse を受け取り cookie を操作）。環境変数型定義を src/lib/env.ts に作成（NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "auth-domain-models",
         "description": "src/backend/contexts/auth/domain/models/user.model.ts に User Rich Domain Model を実装。ファクトリメソッド create(id, email, name, avatarUrl?) でバリデーション実施（Email 値オブジェクト使用）。fromSupabaseUser(supabaseUser) でSupabase Auth ユーザーからの変換。ダミーユーザー生成用の createDummy() static メソッド（開発環境スキップ用、固定 UUID + dummy@example.com）。src/backend/contexts/shared/domain/models/ の UserId, Email 値オブジェクトの実装（ファクトリメソッド + バリデーション）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "auth-domain-tests",
         "description": "src/backend/contexts/auth/domain/models/__tests__/user.model.test.ts に User モデルのユニットテスト（create 正常系、バリデーションエラー、createDummy、fromSupabaseUser）。src/backend/contexts/shared/domain/models/__tests__/email.model.test.ts に Email 値オブジェクトのテスト。src/backend/contexts/shared/domain/models/__tests__/user-id.model.test.ts に UserId のテスト。vitest で全テスト pass することを確認",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "auth-backend-layers",
