@@ -265,7 +265,7 @@
       },
       {
         "id": "fix-e2e-database-url-missing",
-        "description": "E2E テストが DATABASE_URL 未設定環境でクラッシュする問題を修正する。原因: pnpm e2e 実行時に playwright.config.ts の webServer.command である pnpm dev が起動し、/rules ページアクセス時に PrismaExpressionRuleRepository.findAll() が 'Environment variable not found: DATABASE_URL' エラーをスローしてページが表示されない（PrismaClientInitializationError）。結果として E2E テストが全てタイムアウトで失敗する。修正方針: rules/page.tsx と knowledge/page.tsx のローダー呼び出し部分、または各 Repository 実装に DATABASE_URL 未設定時のガード（開発環境ではモックデータを返す）を追加する。あるいは E2E テスト用の .env.test ファイルに SQLite や in-memory DB を設定し、テスト環境で DB なしでも動作するようにする。最も簡単な方法は presentation/loaders に開発環境ガードを追加してモックデータを返すことだが、長期的には DATABASE_URL をローカル開発 .env.local に設定することが推奨される",
+        "description": "E2E テストが DATABASE_URL 未設定環境でクラッシュする問題を修正する。原因: pnpm e2e 実行時に playwright.config.ts の webServer.command である pnpm dev が起動し、/rules・/knowledge ページアクセス時に PrismaClientInitializationError（DATABASE_URL not found）が発生してページが表示されない。修正方針: docs/infrastructure.md の「ローカル開発環境」セクションに従い、Supabase CLI でローカル DB を立てて DATABASE_URL を設定する。手順: (1) supabase start でローカル Supabase を起動、(2) supabase status で DB URL を取得、(3) apps/content-reviewer/.env.local に DATABASE_URL を設定、(4) prisma db push でスキーマを反映、(5) pnpm verify を再実行して E2E が通ることを確認する。ANTHROPIC_API_KEY と OPENAI_API_KEY はローカルの .env に既存。",
         "wave": 9,
         "done": false
       }
