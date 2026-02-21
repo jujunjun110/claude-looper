@@ -74,22 +74,24 @@ mv looper/milestones.json "looper/milestones.$(date +%Y%m%d_%H%M%S).json"
 
 ## Milestone の設計方針
 
-### 依存関係で Milestone を分ける
+### 機能スライスで Milestone を分ける
+
+**各 Milestone は「1つの機能が UI からバックエンドまで縦に通って動く」単位で切る。**
+レイヤーごとの横割り（domain 全部 → infrastructure 全部 → UI 全部）にしない。
 
 Milestone 間は逐次実行。Milestone 内の Task は並列実行される。
 Milestone の境界は「次の Milestone が前の Milestone の成果物を import する」ところ。
 
-### 契約先行パターン
+### 構成パターン
 
-1. **基盤 Milestone**: プロジェクト構成、ツールチェーン
-2. **契約 Milestone**: interface、型定義、API shape
-3. **実装 Milestone**: 契約に基づく並列実装（application + infrastructure）
-4. **統合 Milestone**: presentation + frontend + CI
+1. **基盤 Milestone**: プロジェクト構成、ツールチェーン、認証など横断的な基盤
+2. **最初の機能 Milestone**: 最もシンプルな機能を1つ選び、model → repository → usecase → UI を縦に通す。ここで全レイヤーの実装パターンが確立される
+3. **追加機能 Milestone**: 確立したパターンに乗せて、1 Milestone = 1機能ずつ追加していく
 
 ### goal の書き方
 
-- 悪い例: "DDD レイヤー構造で構成され、Gateway interface が定義される"
-- 良い例: "domain 層が完成する: TextSplitter でテキストを Sentence[] に分割し、CheckResultAggregator で結果を統合でき、unit test が通る"
+- 悪い例: "DDD レイヤー構造で構成され、Gateway interface が定義される"（横割りで何も動かない）
+- 良い例: "/rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、DB に永続化される"（1機能が動く）
 
 goal は具体的に「何が動くか」「何ができるか」を書く。計画セッションがこの goal を見て Task を分解する。
 
@@ -101,8 +103,9 @@ goal は具体的に「何が動くか」「何ができるか」を書く。計
   - URL の直接アクセス（`page.goto()` 等）は禁止。UI 上のクリック操作によって画面遷移すること
   - 初期ページ（トップページ等）へのアクセスのみ `page.goto()` を許可する
 
-### 目標
+### Milestone の粒度
 
-- 全体で 4-6 Milestone
+- 1 Milestone = 1つの独立した機能が動く状態になる粒度を目安にする
+- 複数の機能を1 Milestoneにまとめすぎない
 - Milestone 番号は 1 から連番
 - tasks は全て空配列（計画セッションが Milestone 着手時に W1-W5 の Task を生成する）
