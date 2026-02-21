@@ -2,7 +2,6 @@ import type { User } from '@/backend/contexts/auth/domain/models/user.model';
 
 export interface AuthGateway {
 	getCurrentUser(): Promise<User | null>;
-	signInWithGoogle(): Promise<void>;
+	signInWithGoogle(redirectTo: string): Promise<{ url: string }>;
 	signOut(): Promise<void>;
-	onAuthStateChange(callback: (user: User | null) => void): () => void;
 }
