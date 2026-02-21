@@ -15,6 +15,13 @@ vitest + TypeScript + dependency-cruiser によるコード品質チェック規
 
 CI では `lint` → `typecheck` → `depcruise` → `test` の順で実行する。
 
+### verify コマンド
+
+| コマンド | 内容 | 用途 |
+|---|---|---|
+| `pnpm verify` | lint → prisma generate → typecheck → build → unit test | Builder のセルフチェック（worktree、DB 不要） |
+| `pnpm verify:full` | `pnpm verify` + E2E テスト | Verifier の完全検証（本体ブランチ、ローカル Supabase 必要） |
+
 ---
 
 ## TypeCheck

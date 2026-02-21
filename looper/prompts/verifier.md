@@ -62,7 +62,7 @@ lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
 ### 検証実行
 
-`pnpm verify` を実行する。
+`pnpm verify:full` を実行する。E2E にはローカル Supabase が必要なので、実行前に `supabase status` で起動を確認し、停止中なら `supabase start` + `prisma db push` を行うこと。
 
 ## ステップ3.5: UI の動作確認（UIの変更を伴う場合のみ）
 

@@ -84,7 +84,7 @@ Milestone の境界は「次の Milestone が前の Milestone の成果物を im
 
 ### 構成パターン
 
-1. **基盤 Milestone**: プロジェクト構成、ツールチェーン、認証など横断的な基盤。`docs/quality.md` で定義された品質チェックツール（dependency-cruiser 等）のセットアップも含め、verification コマンドが通る状態にすること
+1. **基盤 Milestone**: プロジェクト構成、ツールチェーン、認証など横断的な基盤。`docs/quality.md` で定義された品質チェックツール（dependency-cruiser 等）のセットアップも含め、verification コマンドが通る状態にすること。DB を使うプロジェクトでは、ローカル DB のセットアップ（`supabase init` 等）もこの Milestone に含め、以降の Milestone で DB が使える状態にする
 2. **最初の機能 Milestone**: 最もシンプルな機能を1つ選び、model → repository → usecase → UI を縦に通す。ここで全レイヤーの実装パターンが確立される
 3. **追加機能 Milestone**: 確立したパターンに乗せて、1 Milestone = 1機能ずつ追加していく
 

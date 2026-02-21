@@ -39,6 +39,15 @@ Milestone 2
   ...
 ```
 
+### 検証の 2 段階
+
+| コマンド | 実行者 | 内容 | DB 必要 |
+|---|---|---|---|
+| `pnpm verify` | Builder | lint → prisma generate → typecheck → build → unit test | No |
+| `pnpm verify:full` | Verifier | `pnpm verify` + E2E テスト | Yes（ローカル Supabase） |
+
+Builder は worktree で動くため DB 不要の `pnpm verify` でセルフチェック。Verifier は本体ブランチで `pnpm verify:full`（E2E あり）で完全検証する。
+
 ### 自己修復
 
 Verifier の検証が失敗すると fix タスクが自動生成され、次のラウンドで Builder がリトライします。
