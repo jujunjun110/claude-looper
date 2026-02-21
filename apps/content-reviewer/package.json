@@ -9,7 +9,8 @@
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"typecheck": "tsc --noEmit",
-		"prisma:generate": "prisma generate"
+		"prisma:generate": "prisma generate",
+		"test:unit": "vitest run --config vitest.unit.config.ts"
 	},
 	"dependencies": {
 		"@prisma/client": "5.22.0",
@@ -28,12 +29,13 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"prisma": "5.22.0",
 		"@tailwindcss/postcss": "^4.1.7",
 		"@types/node": "^22.15.21",
 		"@types/react": "^19.1.4",
 		"@types/react-dom": "^19.1.5",
+		"prisma": "5.22.0",
 		"tailwindcss": "^4.1.7",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitest": "^2.1.9"
 	}
 }
