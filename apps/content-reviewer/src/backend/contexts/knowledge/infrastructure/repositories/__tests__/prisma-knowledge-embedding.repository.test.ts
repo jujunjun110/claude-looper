@@ -8,7 +8,7 @@ import { PrismaKnowledgeEmbeddingRepository } from '../prisma-knowledge-embeddin
 const articleId = createKnowledgeArticleId('550e8400-e29b-41d4-a716-446655440000');
 const embeddingId1 = createKnowledgeEmbeddingId('660e8400-e29b-41d4-a716-446655440001');
 const embeddingId2 = createKnowledgeEmbeddingId('660e8400-e29b-41d4-a716-446655440002');
-const sampleEmbeddingValues = Array.from({ length: 3 }, (_, i) => (i + 1) * 0.1);
+const sampleEmbeddingValues = Array.from({ length: 1536 }, (_, i) => (i + 1) * 0.001);
 
 function makeEmbedding(
 	id: ReturnType<typeof createKnowledgeEmbeddingId>,
