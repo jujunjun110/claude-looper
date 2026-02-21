@@ -1,6 +1,6 @@
 'use client';
 
-import type { KnowledgeArticle } from '@/backend/contexts/knowledge/domain/models/knowledge-article.model';
+import type { KnowledgeArticleDTO } from '@/backend/contexts/knowledge/presentation/loaders/knowledge-articles.loader';
 import { Badge } from '@/components/ui/badge';
 import {
 	Table,
@@ -14,7 +14,7 @@ import { DeleteKnowledgeArticleButton } from './delete-knowledge-article-button'
 import { KnowledgeArticleFormDialog } from './knowledge-article-form-dialog';
 
 interface KnowledgeArticleTableProps {
-	articles: KnowledgeArticle[];
+	articles: KnowledgeArticleDTO[];
 }
 
 export function KnowledgeArticleTable({ articles }: KnowledgeArticleTableProps) {
@@ -38,7 +38,7 @@ export function KnowledgeArticleTable({ articles }: KnowledgeArticleTableProps) 
 			</TableHeader>
 			<TableBody>
 				{articles.map((article) => (
-					<TableRow key={article.id as string}>
+					<TableRow key={article.id}>
 						<TableCell className="font-medium">{article.title}</TableCell>
 						<TableCell>
 							{article.sourceType === 'manual' ? (
@@ -48,13 +48,13 @@ export function KnowledgeArticleTable({ articles }: KnowledgeArticleTableProps) 
 							)}
 						</TableCell>
 						<TableCell className="text-muted-foreground">
-							{article.createdAt.toLocaleDateString('ja-JP')}
+							{new Date(article.createdAt).toLocaleDateString('ja-JP')}
 						</TableCell>
 						<TableCell className="text-right">
 							<div className="flex items-center justify-end gap-2">
 								<KnowledgeArticleFormDialog article={article} />
 								<DeleteKnowledgeArticleButton
-									articleId={article.id as string}
+									articleId={article.id}
 									title={article.title}
 								/>
 							</div>

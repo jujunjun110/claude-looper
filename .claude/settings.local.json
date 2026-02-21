@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(supabase --version:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm exec supabase:*)",
+      "Bash(pnpm exec prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@127.0.0.1:54322/postgres\" pnpm exec prisma db push:*)",
+      "Bash(docker ps:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@127.0.0.1:54352/postgres\" pnpm exec prisma db push:*)",
+      "Bash(pnpm e2e:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pnpm exec tsc:*)"
+    ]
+  }
+}

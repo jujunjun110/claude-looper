@@ -282,7 +282,7 @@
         "id": "note-import-presentation",
         "description": "src/backend/contexts/knowledge/presentation/composition/knowledge-article.composition.ts を更新して createFetchNoteArticleListUseCase()（NoteScraperHttpGateway を注入）と createImportNoteArticlesUseCase()（NoteScraperHttpGateway + PrismaKnowledgeArticleRepository + PrismaKnowledgeEmbeddingRepository + OpenAIEmbeddingGateway を注入）ファクトリ関数を追加。src/backend/contexts/knowledge/presentation/loaders/note-article-list.loader.ts を新規作成（loadNoteArticles(accountName: string): Promise<NoteArticleSummary[]>、createFetchNoteArticleListUseCase 経由）。src/backend/contexts/knowledge/presentation/actions/import-note-articles.action.ts を新規作成（'use server' Server Action、FormData から selectedUrls と accountName を受け取り ImportNoteArticlesUseCase を呼び出し revalidatePath('/knowledge') を実行）",
         "wave": 3,
-        "done": false
+        "done": true
       },
       {
         "id": "note-import-ui",
