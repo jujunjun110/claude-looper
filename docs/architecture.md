@@ -1,18 +1,91 @@
 # Backend Architecture Rules
 
 pnpm workspace + Next.js App Router における DDD バックエンド設計規約。
-`apps/{app}/src/backend/` 配下に適用する。
+`src/backend/` 配下に適用する。
 
 ---
 
-## DDD 4層構造
+## Bounded Context
+
+ドメインの境界を Bounded Context で分割し、Context ごとに独立した 4 層構造を持たせる。
+
+### ディレクトリ構成
+
+```
+src/backend/
+└── contexts/
+    ├── {context-name}/          # 例: content-check, rule, knowledge, auth
+    │   ├── presentation/
+    │   │   ├── composition/     # Composition Root
+    │   │   ├── loaders/         # データ取得（読み取り専用）
+    │   │   └── actions/         # 副作用（CUD, SSE ストリーム）
+    │   ├── application/
+    │   │   └── usecases/        # ユースケースオーケストレーション
+    │   ├── domain/
+    │   │   ├── models/          # ドメインモデル
+    │   │   ├── services/        # ドメインサービス
+    │   │   └── gateways/        # Gateway / Repository interface
+    │   └── infrastructure/
+    │       ├── ai/              # AI Gateway 実装
+    │       └── repositories/    # Repository 実装
+    │
+    ├── shared/                  # Shared Context（後述）
+    │   ├── domain/
+    │   │   ├── models/          # 共有値オブジェクト（UserId, Timestamp 等）
+    │   │   └── gateways/        # 共有 Gateway interface
+    │   └── infrastructure/
+    │       ├── ai/              # AI クライアント初期化等
+    │       ├── repositories/    # 共通 Repository 実装
+    │       └── db/              # DB 接続プール等
+    │
+    └── {another-context}/
+        └── ...（同構造）
+```
+
+### Context 分割ルール
+
+- **1 Context = 1 ドメイン境界。** ビジネス上の関心事の単位で分割する
+- **Context 間の直接 import 禁止。** Context 間連携が必要な場合は Shared Context の型を介するか、application 層でイベント/メッセージングを使う
+- **Context 名は kebab-case。** ドメインの言葉をそのまま使う（例: `content-check`, `expression-rule`, `knowledge`, `auth`）
+
+### Shared Context
+
+`contexts/shared/` は Context 横断で再利用される型・実装を配置する特殊な Context。
+
+**配置してよいもの:**
+- 汎用値オブジェクト（`UserId`, `Timestamp`, `Email` 等）
+- 共通 Gateway interface（汎用 AI Gateway 等）
+- 技術的共通基盤（DB 接続プール、AI クライアント初期化、共通 Repository 基底クラス等）
+
+**配置してはいけないもの:**
+- 特定ドメインのビジネスロジック
+- 特定 Context にしか使われないモデルやサービス
+
+**Shared Context が肥大化した場合:**
+Shared Context に application 層やビジネスロジックが必要になった場合、それは独立した Bounded Context に昇格させるべきサイン。Shared Context は常にロジックを持たない薄い層に留める。
+
+### import ルール
+
+| from → to | 許可 |
+|---|---|
+| Context A → Context B | 禁止 |
+| Context → shared/domain | 許可 |
+| Context → shared/infrastructure | 許可（infrastructure 層のみ） |
+| shared/domain → Context | 禁止 |
+| shared/infrastructure → shared/domain | 許可 |
+
+---
+
+## DDD 4 層構造（各 Context 内）
+
+各 Bounded Context 内で以下の 4 層を持つ。
 
 | 層 | ディレクトリ | 責務 |
 |---|---|---|
-| presentation | `composition/` `loaders/` `actions/` | Next.js Server Components / Server Actions との接続 |
-| application | `usecases/` | ユースケースオーケストレーション。プロンプト生成・レスポンスパース含む |
-| domain | `models/` `services/` `gateways/` | ビジネスルール。外部依存なし |
-| infrastructure | `ai/` `repositories/` | Gateway / Repository 実装。外部サービス接続 |
+| presentation | `presentation/composition/` `loaders/` `actions/` | Next.js Server Components / Server Actions との接続 |
+| application | `application/usecases/` | ユースケースオーケストレーション。プロンプト生成・レスポンスパース含む |
+| domain | `domain/models/` `services/` `gateways/` | ビジネスルール。外部依存なし |
+| infrastructure | `infrastructure/ai/` `repositories/` | Gateway / Repository 実装。外部サービス接続 |
 
 ---
 
@@ -25,7 +98,7 @@ pnpm workspace + Next.js App Router における DDD バックエンド設計規
 - **infrastructure → domain/gateways。** interface を implements する
 - **presentation/loaders, actions → application + presentation/composition のみ。** domain・infrastructure 直接参照禁止
 - **presentation/composition → 全層。** UseCase と infrastructure 実装を組み立てる唯一の場所（後述）
-- **フロントエンド** (`app/`, `components/`, `hooks/`, `lib/`) **→ backend/presentation/ のみ**
+- **フロントエンド** (`app/`, `components/`, `hooks/`, `lib/`) **→ backend/contexts/{context}/presentation/ のみ**
 
 ---
 
@@ -78,8 +151,9 @@ Next.js と DDD の唯一の接続点。**API Route は原則使用しない。*
 
 | 種類 | interface 配置 | 実装配置 |
 |---|---|---|
-| Gateway (AI) | `domain/gateways/` | `infrastructure/ai/` |
-| Repository | `domain/gateways/` | `infrastructure/repositories/` |
+| Gateway (AI) | `contexts/{context}/domain/gateways/` | `contexts/{context}/infrastructure/ai/` |
+| Repository | `contexts/{context}/domain/gateways/` | `contexts/{context}/infrastructure/repositories/` |
+| 共通 Gateway | `contexts/shared/domain/gateways/` | `contexts/shared/infrastructure/ai/` |
 
 ### Repository
 
