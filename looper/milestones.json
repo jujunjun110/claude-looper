@@ -116,7 +116,62 @@
     "goal": "/rules ページで表現ルール（NG表現→推奨表現）の一覧表示・新規登録・編集・削除ができ、ExpressionRule ドメインモデル → PrismaExpressionRuleRepository → UseCase（CRUD 4種） → Server Actions → UI の全レイヤーが縦に通って DB に永続化される",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
-    "tasks": []
+    "tasks": [
+      {
+        "id": "expression-rule-contracts",
+        "description": "expression-rule context の契約定義。src/backend/contexts/shared/domain/models/expression-rule-id.model.ts に ExpressionRuleId branded type（createExpressionRuleId ファクトリ + UUID バリデーション）を作成。src/backend/contexts/expression-rule/domain/models/expression-rule.model.ts に ExpressionRule クラスの型定義（ExpressionRuleProps interface: id, ngExpression, recommendedExpression, description, isActive, createdBy, createdAt, updatedAt）と Result 型を定義。src/backend/contexts/expression-rule/domain/gateways/expression-rule.repository.ts に ExpressionRuleRepository interface（save, findById, findAll, findActive, delete）をドメインモデル型のみで定義",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "expression-rule-domain-model",
+        "description": "src/backend/contexts/expression-rule/domain/models/expression-rule.model.ts に ExpressionRule Rich Domain Model を実装。private constructor + ファクトリメソッド create(ngExpression, recommendedExpression, description?, createdBy) で NG表現・推奨表現の空文字バリデーション。reconstruct() で DB からの復元。update(ngExpression, recommendedExpression, description?) で更新。deactivate()/activate() で有効化/無効化。src/backend/contexts/shared/domain/models/__tests__/expression-rule-id.model.test.ts と src/backend/contexts/expression-rule/domain/models/__tests__/expression-rule.model.test.ts にユニットテスト（create 正常系、バリデーションエラー、update、deactivate/activate）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "expression-rule-repository-impl",
+        "description": "src/backend/contexts/expression-rule/infrastructure/repositories/prisma-expression-rule.repository.ts に PrismaExpressionRuleRepository を実装。ExpressionRuleRepository interface を implements し、Prisma ExpressionRule ↔ ドメイン ExpressionRule 変換（toDomain / toPrisma private メソッド）を行う。save（upsert）、findById、findAll、findActive（isActive=true のみ）、delete を実装。prisma-client.ts の共有 PrismaClient を利用",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "expression-rule-usecases",
+        "description": "expression-rule context の UseCase 4種を実装。src/backend/contexts/expression-rule/application/usecases/create-expression-rule.usecase.ts（ExpressionRuleRepository を DI、ExpressionRule.create → repository.save）、update-expression-rule.usecase.ts（findById → update → save、存在しない場合は throw）、delete-expression-rule.usecase.ts（findById → repository.delete、存在しない場合は throw）、list-expression-rules.usecase.ts（repository.findAll で一覧取得）。各 UseCase はクラスベース + constructor DI + execute() メソッド",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "expression-rule-usecase-tests",
+        "description": "UseCase 4種のユニットテストを作成。src/backend/contexts/expression-rule/application/usecases/__tests__/create-expression-rule.usecase.test.ts、update-expression-rule.usecase.test.ts、delete-expression-rule.usecase.test.ts、list-expression-rules.usecase.test.ts。ExpressionRuleRepository をモックし、正常系・異常系（バリデーションエラー、存在しないルールの更新/削除）をテスト。vitest で全テスト pass を確認",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "playwright-setup",
+        "description": "apps/content-reviewer/package.json に @playwright/test を devDependencies に追加し pnpm install を実行。apps/content-reviewer/playwright.config.ts を作成（baseURL: http://localhost:3000、webServer で next dev 起動、テストディレクトリ: e2e/）。apps/content-reviewer/e2e/rules.spec.ts に /rules ページの E2E テストを作成（ルール一覧表示、新規登録フォーム表示、登録→一覧に表示、編集、削除の基本シナリオ）。ルート package.json の scripts に e2e script を追加",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "expression-rule-presentation",
+        "description": "expression-rule context の presentation 層を実装。src/backend/contexts/expression-rule/presentation/composition/expression-rule.composition.ts に createListExpressionRulesUseCase / createCreateExpressionRuleUseCase / createUpdateExpressionRuleUseCase / createDeleteExpressionRuleUseCase ファクトリ関数（PrismaExpressionRuleRepository + prisma を注入）。src/backend/contexts/expression-rule/presentation/loaders/expression-rules.loader.ts に loadExpressionRules()（UseCase 経由で一覧取得）。src/backend/contexts/expression-rule/presentation/actions/create-expression-rule.action.ts、update-expression-rule.action.ts、delete-expression-rule.action.ts に 'use server' Server Actions（FormData → UseCase 呼び出し → revalidatePath('/rules')）。開発環境ではダミーユーザー ID を使用",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "expression-rule-ui",
+        "description": "shadcn/ui コンポーネント追加（Dialog, Table, Label, Textarea, Badge が未追加なら追加）。src/components/rules/expression-rule-table.tsx（'use client'、一覧テーブル: NG表現・推奨表現・補足説明・ステータス・操作ボタン）、expression-rule-form-dialog.tsx（'use client'、新規登録/編集兼用の Dialog フォーム: ngExpression, recommendedExpression, description 入力 → Server Action 呼び出し）、delete-expression-rule-button.tsx（'use client'、削除確認付きボタン → Server Action 呼び出し）を作成。src/app/(app)/rules/page.tsx を更新し、loadExpressionRules() で一覧取得 → ExpressionRuleTable に props 渡し + 新規登録ボタン配置",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "verify-milestone3",
+        "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
+        "wave": 4,
+        "done": false
+      }
+    ]
   },
   {
     "milestone": 4,
