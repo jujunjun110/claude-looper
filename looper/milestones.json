@@ -288,7 +288,7 @@
         "id": "note-import-ui",
         "description": "src/components/knowledge/note-article-list.tsx を新規作成（'use client'、NoteArticleSummary[] を props で受け取りチェックボックス付きテーブルを表示し選択記事の URL を import-note-articles.action.ts に送信する form、ローディング状態対応）。src/app/(app)/knowledge/import/page.tsx を更新（Server Component、searchParams.accountName があれば loadNoteArticles() を呼んで NoteArticleList コンポーネントに渡す。アカウント名入力フォームを配置し送信で同ページに ?accountName=xxx リダイレクト）。e2e/knowledge-import.spec.ts を新規作成し /knowledge/import ページの E2E テスト（アカウント名入力フォーム表示・送信後に記事一覧が表示されること・記事選択して保存後に /knowledge ページに遷移し記事が追加されていることを確認する基本シナリオ）を追加",
         "wave": 4,
-        "done": false
+        "done": true
       },
       {
         "id": "verify-milestone5",
