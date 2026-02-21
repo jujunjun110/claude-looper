@@ -47,7 +47,7 @@
     "milestone": 2,
     "goal": "Supabase Auth による Google OAuth ログイン・ログアウトが動作し、未認証時は /login にリダイレクトされ、開発環境（NODE_ENV=development）では認証スキップでダミーユーザーとしてダッシュボード（空の / ページ）にアクセスできる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
-    "done": false,
+    "done": true,
     "tasks": [
       {
         "id": "auth-deps-and-test-setup",
@@ -101,13 +101,13 @@
         "id": "fix-dev-mode-dummy-user",
         "description": "開発環境（NODE_ENV=development）で / にアクセスすると Missing environment variable: NEXT_PUBLIC_SUPABASE_URL エラーが発生する。原因: (app)/layout.tsx が loadCurrentUser() → createGetCurrentUserUseCase() → createSupabaseServerClient() を呼び出し、Supabase 環境変数が未設定のためクラッシュする。修正方針: current-user.loader.ts の loadCurrentUser() 先頭で NODE_ENV === 'development' を判定し、User.createDummy() を返すことで Supabase 接続をバイパスする。同様に sign-in.action.ts と sign-out.action.ts にも開発環境ガードを追加する（開発環境ではリダイレクトのみ）",
         "wave": 5,
-        "done": false
+        "done": true
       },
       {
         "id": "verify-milestone2",
         "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test を実行し全て成功することを確認。開発環境（NODE_ENV=development）で認証スキップが動作し / にアクセスできることを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗があれば全て修正する",
         "wave": 6,
-        "done": false
+        "done": true
       }
     ]
   },
