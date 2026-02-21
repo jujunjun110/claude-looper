@@ -5,22 +5,22 @@ import { UpdateExpressionRuleUseCase } from '@/backend/contexts/expression-rule/
 import { PrismaExpressionRuleRepository } from '@/backend/contexts/expression-rule/infrastructure/repositories/prisma-expression-rule.repository';
 import { prisma } from '@/backend/contexts/shared/infrastructure/db/prisma-client';
 
+function createRepository(): PrismaExpressionRuleRepository {
+	return new PrismaExpressionRuleRepository(prisma);
+}
+
 export function createListExpressionRulesUseCase(): ListExpressionRulesUseCase {
-	const repository = new PrismaExpressionRuleRepository(prisma);
-	return new ListExpressionRulesUseCase(repository);
+	return new ListExpressionRulesUseCase(createRepository());
 }
 
 export function createCreateExpressionRuleUseCase(): CreateExpressionRuleUseCase {
-	const repository = new PrismaExpressionRuleRepository(prisma);
-	return new CreateExpressionRuleUseCase(repository);
+	return new CreateExpressionRuleUseCase(createRepository());
 }
 
 export function createUpdateExpressionRuleUseCase(): UpdateExpressionRuleUseCase {
-	const repository = new PrismaExpressionRuleRepository(prisma);
-	return new UpdateExpressionRuleUseCase(repository);
+	return new UpdateExpressionRuleUseCase(createRepository());
 }
 
 export function createDeleteExpressionRuleUseCase(): DeleteExpressionRuleUseCase {
-	const repository = new PrismaExpressionRuleRepository(prisma);
-	return new DeleteExpressionRuleUseCase(repository);
+	return new DeleteExpressionRuleUseCase(createRepository());
 }

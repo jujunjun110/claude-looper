@@ -1,11 +1,9 @@
 import { CreateExpressionRuleUseCase } from '@/backend/contexts/expression-rule/application/usecases/create-expression-rule.usecase';
 import type { ExpressionRuleRepository } from '@/backend/contexts/expression-rule/domain/gateways/expression-rule.repository';
 import { ExpressionRule } from '@/backend/contexts/expression-rule/domain/models/expression-rule.model';
-import { createExpressionRuleId } from '@/backend/contexts/shared/domain/models/expression-rule-id.model';
 import { createUserId } from '@/backend/contexts/shared/domain/models/user-id.model';
 import { describe, expect, it, vi } from 'vitest';
 
-const validId = createExpressionRuleId('550e8400-e29b-41d4-a716-446655440000');
 const validUserId = createUserId('660e8400-e29b-41d4-a716-446655440000');
 
 function createMockRepository(
@@ -27,7 +25,6 @@ describe('CreateExpressionRuleUseCase', () => {
 		const useCase = new CreateExpressionRuleUseCase(repository);
 
 		const result = await useCase.execute({
-			id: validId,
 			ngExpression: '善処します',
 			recommendedExpression: '具体的に対応します',
 			description: '曖昧な表現を避ける',
@@ -35,7 +32,6 @@ describe('CreateExpressionRuleUseCase', () => {
 		});
 
 		expect(result).toBeInstanceOf(ExpressionRule);
-		expect(result.id).toBe(validId);
 		expect(result.ngExpression).toBe('善処します');
 		expect(result.recommendedExpression).toBe('具体的に対応します');
 		expect(result.description).toBe('曖昧な表現を避ける');
@@ -49,7 +45,6 @@ describe('CreateExpressionRuleUseCase', () => {
 		const useCase = new CreateExpressionRuleUseCase(repository);
 
 		const result = await useCase.execute({
-			id: validId,
 			ngExpression: 'NG表現',
 			recommendedExpression: '推奨表現',
 			createdBy: validUserId,
@@ -65,7 +60,6 @@ describe('CreateExpressionRuleUseCase', () => {
 
 		await expect(
 			useCase.execute({
-				id: validId,
 				ngExpression: '',
 				recommendedExpression: '推奨表現',
 				createdBy: validUserId,
@@ -81,7 +75,6 @@ describe('CreateExpressionRuleUseCase', () => {
 
 		await expect(
 			useCase.execute({
-				id: validId,
 				ngExpression: 'NG表現',
 				recommendedExpression: '',
 				createdBy: validUserId,
@@ -99,7 +92,6 @@ describe('CreateExpressionRuleUseCase', () => {
 
 		await expect(
 			useCase.execute({
-				id: validId,
 				ngExpression: 'NG表現',
 				recommendedExpression: '推奨表現',
 				createdBy: validUserId,
