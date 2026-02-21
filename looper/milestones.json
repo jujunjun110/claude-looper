@@ -195,31 +195,31 @@
         "id": "knowledge-article-domain-model",
         "description": "src/backend/contexts/knowledge/domain/models/knowledge-article.model.ts に KnowledgeArticle Rich Domain Model を実装。private constructor + ファクトリメソッド create(title, content, sourceType, createdBy, sourceUrl?) でタイトル・本文の空文字バリデーション（Result 型で返す）。reconstruct() で DB からの復元。update(title, content) で更新。src/backend/contexts/knowledge/domain/models/__tests__/knowledge-article.model.test.ts にユニットテスト（create 正常系、バリデーションエラー、update）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-embedding-domain-model",
         "description": "src/backend/contexts/knowledge/domain/models/knowledge-embedding.model.ts に KnowledgeEmbedding Rich Domain Model を実装。private constructor + ファクトリメソッド create(articleId, chunkIndex, chunkText, embedding) で embedding の次元数（1536）バリデーション（Result 型で返す）。reconstruct() で DB からの復元。src/backend/contexts/knowledge/domain/models/__tests__/knowledge-embedding.model.test.ts にユニットテスト（create 正常系、次元数バリデーションエラー）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "openai-embedding-gateway",
         "description": "apps/content-reviewer/package.json に openai パッケージを追加し pnpm install を実行。src/backend/contexts/shared/infrastructure/ai/openai-embedding.gateway.ts に EmbeddingGateway を implements した OpenAIEmbeddingGateway クラスを実装（openai SDK の embeddings.create を呼び出し、model: 'text-embedding-3-small'、1536次元のベクトルを返す）。環境変数 OPENAI_API_KEY を利用",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "prisma-knowledge-article-repository",
         "description": "src/backend/contexts/knowledge/infrastructure/repositories/prisma-knowledge-article.repository.ts に PrismaKnowledgeArticleRepository を実装。KnowledgeArticleRepository interface を implements し、Prisma KnowledgeArticle ↔ ドメイン KnowledgeArticle 変換（toDomain / toPrisma private メソッド）。save（upsert）、findById、findAll、delete を実装。共有 prisma-client.ts の PrismaClient を利用",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "prisma-knowledge-embedding-repository",
         "description": "src/backend/contexts/knowledge/infrastructure/repositories/prisma-knowledge-embedding.repository.ts に PrismaKnowledgeEmbeddingRepository を実装。KnowledgeEmbeddingRepository interface を implements し、saveMany（createMany）、deleteByArticleId、searchSimilar（pgvector の <-> 演算子を使ったコサイン距離検索、$queryRaw で実行）を実装。共有 prisma-client.ts の PrismaClient を利用",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "knowledge-usecases",
@@ -255,6 +255,12 @@
         "id": "fix-e2e-next-build-conflict",
         "description": "E2E テストが Runtime Error で失敗する問題を修正する。原因: pnpm build（本番ビルド）実行後に pnpm e2e を実行すると playwright.config.ts の webServer.command である pnpm dev が .next/ ディレクトリの不完全な状態で起動し、'ENOENT: no such file or directory, open .../.next/server/pages/_document.js' エラーが発生してページが表示されない。修正方針: playwright.config.ts の webServer.command を 'pnpm dev' から '.next/ を削除してから pnpm dev を起動するコマンド' に変更するか、または pnpm verify の e2e 実行前に .next/ をクリアするステップを追加する（例: 'rm -rf .next && pnpm dev'）。あるいは webServer を 'next build && next start' に変更して本番ビルドのサーバーで E2E を実行することも検討する",
         "wave": 7,
+        "done": false
+      },
+      {
+        "id": "fix-knowledge-embedding-repository-test-dimensions",
+        "description": "prisma-knowledge-embedding.repository.test.ts の sampleEmbeddingValues が Array.from({ length: 3 }, ...) で3次元になっており、KnowledgeEmbedding.create() の1536次元バリデーションで失敗している。修正方針: sampleEmbeddingValues を Array.from({ length: 1536 }, (_, i) => (i + 1) * 0.001) に変更する。また searchSimilar テストの rawRows.embedding も '[0.1,0.2,...（1536次元分）]' に更新する（reconstruct はバリデーションなしなので現状は通るが、正しいテストデータにする）",
+        "wave": 8,
         "done": false
       }
     ]
