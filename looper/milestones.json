@@ -253,7 +253,50 @@
     "goal": "/knowledge/import で note アカウント名を入力すると NoteScraperGateway 経由で記事一覧が表示され、選択した記事の本文を取得して DB に保存し Embedding を生成できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
-    "tasks": []
+    "tasks": [
+      {
+        "id": "note-scraper-contract",
+        "description": "src/backend/contexts/knowledge/domain/gateways/note-scraper.gateway.ts を新規作成し、NoteArticleSummary 型（title: string, url: string, publishedAt: Date）と NoteScraperGateway interface（fetchArticleList(accountName: string): Promise<NoteArticleSummary[]>、fetchArticleContent(url: string): Promise<{ title: string; content: string }>）を定義する",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "note-scraper-gateway-impl",
+        "description": "必要に応じて apps/content-reviewer/package.json に RSS/XML パース用パッケージ（fast-xml-parser 等）を追加し pnpm install を実行。src/backend/contexts/knowledge/infrastructure/note-scraper.http-gateway.ts に NoteScraperHttpGateway クラスを実装（NoteScraperGateway interface を implements）。fetchArticleList は https://note.com/{accountName}/rss をフェッチして RSS XML をパースし NoteArticleSummary[] を返す。fetchArticleContent は記事 URL をフェッチして HTML から本文テキストを抽出して返す。src/backend/contexts/knowledge/infrastructure/__tests__/note-scraper.http-gateway.test.ts にユニットテストを追加（fetch をモック）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "fetch-note-article-list-usecase",
+        "description": "src/backend/contexts/knowledge/application/usecases/fetch-note-article-list.usecase.ts に FetchNoteArticleListUseCase を実装（クラスベース + NoteScraperGateway コンストラクタ DI + execute(accountName: string): Promise<NoteArticleSummary[]>）。src/backend/contexts/knowledge/application/usecases/__tests__/fetch-note-article-list.usecase.test.ts にユニットテストを追加（NoteScraperGateway をモック、正常系・空リスト）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "import-note-articles-usecase",
+        "description": "src/backend/contexts/knowledge/application/usecases/import-note-articles.usecase.ts に ImportNoteArticlesUseCase を実装（NoteScraperGateway + KnowledgeArticleRepository + KnowledgeEmbeddingRepository + EmbeddingGateway をコンストラクタ DI。execute({ selectedUrls: string[], createdBy: UserId }) で各 URL に対して fetchArticleContent → KnowledgeArticle.create(sourceType: 'note') → articleRepository.save → EmbeddingGateway.generateEmbedding → KnowledgeEmbedding.create → embeddingRepository.saveMany を実行）。src/backend/contexts/knowledge/application/usecases/__tests__/import-note-articles.usecase.test.ts にユニットテストを追加（全依存をモック、正常系: fetchArticleContent・save・generateEmbedding・saveMany の呼び出しを検証）",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "note-import-presentation",
+        "description": "src/backend/contexts/knowledge/presentation/composition/knowledge-article.composition.ts を更新して createFetchNoteArticleListUseCase()（NoteScraperHttpGateway を注入）と createImportNoteArticlesUseCase()（NoteScraperHttpGateway + PrismaKnowledgeArticleRepository + PrismaKnowledgeEmbeddingRepository + OpenAIEmbeddingGateway を注入）ファクトリ関数を追加。src/backend/contexts/knowledge/presentation/loaders/note-article-list.loader.ts を新規作成（loadNoteArticles(accountName: string): Promise<NoteArticleSummary[]>、createFetchNoteArticleListUseCase 経由）。src/backend/contexts/knowledge/presentation/actions/import-note-articles.action.ts を新規作成（'use server' Server Action、FormData から selectedUrls と accountName を受け取り ImportNoteArticlesUseCase を呼び出し revalidatePath('/knowledge') を実行）",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "note-import-ui",
+        "description": "src/components/knowledge/note-article-list.tsx を新規作成（'use client'、NoteArticleSummary[] を props で受け取りチェックボックス付きテーブルを表示し選択記事の URL を import-note-articles.action.ts に送信する form、ローディング状態対応）。src/app/(app)/knowledge/import/page.tsx を更新（Server Component、searchParams.accountName があれば loadNoteArticles() を呼んで NoteArticleList コンポーネントに渡す。アカウント名入力フォームを配置し送信で同ページに ?accountName=xxx リダイレクト）。e2e/knowledge-import.spec.ts を新規作成し /knowledge/import ページの E2E テスト（アカウント名入力フォーム表示・送信後に記事一覧が表示されること・記事選択して保存後に /knowledge ページに遷移し記事が追加されていることを確認する基本シナリオ）を追加",
+        "wave": 4,
+        "done": false
+      },
+      {
+        "id": "verify-milestone5",
+        "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
+        "wave": 5,
+        "done": false
+      }
+    ]
   },
   {
     "milestone": 6,
