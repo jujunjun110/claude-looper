@@ -308,7 +308,80 @@
     "goal": "/checks/new でテキストを入力して送信すると、AIGateway による段落分割→5種のチェック（ファクトチェック・ナレッジ整合性・表現ルール適合・炎上リスク・文章クオリティ）が並列実行され、SSE で進捗がリアルタイム表示され、完了後 /checks/[id] で結果詳細（セグメントごとの指摘・severity・修正提案）を確認できる",
     "verification": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test",
     "done": false,
-    "tasks": []
+    "tasks": [
+      {
+        "id": "content-check-contracts",
+        "description": "content-check context の全契約定義（W2以降の全タスクが参照する）。(1) src/backend/contexts/shared/domain/models/ に ContentCheckId・ContentSegmentId・CheckResultId の各 branded type（createXxxId ファクトリ + UUID バリデーション）を追加。(2) src/backend/contexts/shared/domain/gateways/ai.gateway.ts を新規作成（AIGateway interface: generate(prompt, options?): Promise<string>、generateWithWebSearch(prompt, options?): Promise<string>、generateStream(prompt, options?): AsyncGenerator<string> + GenerateOptions 型）。(3) src/backend/contexts/content-check/domain/models/content-check.model.ts に ContentCheckProps interface・CheckStatus type ('pending'|'processing'|'completed'|'failed')・Result型・ContentCheck クラス骨格（create/reconstruct/startProcessing/complete/fail のメソッドシグネチャ、ボディは throw new Error('not implemented')）を定義。(4) content-segment.model.ts に ContentSegmentProps + ContentSegment クラス骨格を定義。(5) check-result.model.ts に CheckType type ('fact_check'|'knowledge_consistency'|'expression_rule'|'risk_assessment'|'quality')・Severity type ('info'|'warning'|'error')・CheckResultProps・CheckResult クラス骨格を定義。(6) src/backend/contexts/content-check/domain/gateways/ に ContentCheckFilter 型・ContentCheckRepository（save, findById, findAll(filter)）・ContentSegmentRepository（saveMany, findByContentCheckId）・CheckResultRepository（saveMany, findBySegmentId, findByContentCheckId）・ExpressionRuleProvider（findActiveRules(): Promise<{ngExpression: string; recommendedExpression: string}[]>）・KnowledgeSearchGateway（searchSimilar(embedding: number[], limit: number): Promise<{chunkText: string}[]>）の各 interface ファイルを新規作成する",
+        "wave": 1,
+        "done": false
+      },
+      {
+        "id": "content-check-domain-models",
+        "description": "content-check context のドメインモデル実装とドメインサービス。(1) src/backend/contexts/content-check/domain/models/content-check.model.ts を実装: private constructor + create(source, originalText, userId?) で空文字・30000字上限バリデーション（Result型返却）・reconstruct() で DB復元・startProcessing()/complete()/fail() でステータス遷移を実装。(2) content-segment.model.ts: create(contentCheckId, segmentIndex, text) + reconstruct() を実装。(3) check-result.model.ts: create(segmentId, checkType, severity, message, suggestion?) + reconstruct() を実装。(4) src/backend/contexts/content-check/domain/services/content-review.service.ts を新規作成: ContentReviewService クラス（summarize(results: CheckResult[]): {error: number, warning: number, info: number} で severity 別カウントを集計）。(5) src/backend/contexts/content-check/domain/models/__tests__/ に各モデルのユニットテスト（create 正常系・バリデーションエラー・ステータス遷移）を追加",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "anthropic-ai-gateway",
+        "description": "Anthropic Claude API の AIGateway 実装。apps/content-reviewer/package.json に @anthropic-ai/sdk を追加し pnpm install を実行。src/backend/contexts/shared/infrastructure/ai/anthropic-ai.gateway.ts に AnthropicAIGateway implements AIGateway を実装: generate() は messages.create() で claude-sonnet-4-6 を呼び出し最初の text ブロックを返す、generateWithWebSearch() は web_search_20250305 ツールを tools に渡して messages.create() を呼び出し最終 text ブロックを返す、generateStream() は messages.stream() を使い AsyncGenerator で text_delta チャンクを yield する。ANTHROPIC_API_KEY 環境変数を利用。src/backend/contexts/shared/infrastructure/ai/__tests__/anthropic-ai.gateway.test.ts に @anthropic-ai/sdk をモックしたユニットテスト（generate・generateWithWebSearch の正常系）を追加",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "content-check-repositories",
+        "description": "content-check context の Prisma Repository 実装3種。src/backend/contexts/content-check/infrastructure/repositories/ に以下を新規作成: (1) prisma-content-check.repository.ts: PrismaContentCheckRepository implements ContentCheckRepository（save は upsert、findById、findAll(filter) は ContentCheckFilter に応じた where 条件付き検索 + toDomain/toPrisma 変換）。(2) prisma-content-segment.repository.ts: PrismaContentSegmentRepository implements ContentSegmentRepository（saveMany は createMany、findByContentCheckId + toDomain 変換）。(3) prisma-check-result.repository.ts: PrismaCheckResultRepository implements CheckResultRepository（saveMany は createMany、findBySegmentId、findByContentCheckId + toDomain 変換）。各 Repository は共有 prisma-client.ts の PrismaClient を利用し Prisma 型 ↔ ドメインモデル変換を行う",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "cross-context-providers-impl",
+        "description": "content-check context 内から他 Context のデータを参照するための Gateway 実装2種（Context 間の直接 import を回避）。(1) src/backend/contexts/content-check/infrastructure/prisma-expression-rule.provider.ts: PrismaExpressionRuleProvider implements ExpressionRuleProvider。findActiveRules() で prisma.expressionRule.findMany({ where: { isActive: true } }) を直接呼び出し { ngExpression, recommendedExpression }[] に変換して返す。expression-rule context は一切 import しない。(2) src/backend/contexts/content-check/infrastructure/prisma-knowledge-search.gateway.ts: PrismaKnowledgeSearchGateway implements KnowledgeSearchGateway。searchSimilar(embedding, limit) で pgvector の <-> コサイン距離演算子を使った $queryRaw で knowledge_embeddings テーブルを検索し { chunkText: string }[] を返す。knowledge context は一切 import しない",
+        "wave": 2,
+        "done": false
+      },
+      {
+        "id": "execute-content-check-usecase",
+        "description": "ExecuteContentCheckUseCase の実装（Milestone 6 の中核処理）。src/backend/contexts/content-check/application/usecases/execute-content-check.usecase.ts: コンストラクタ DI（AIGateway, EmbeddingGateway, ContentCheckRepository, ContentSegmentRepository, CheckResultRepository, ExpressionRuleProvider, KnowledgeSearchGateway）。execute({ source, originalText, userId?, onProgress? }): (1) ContentCheck.create → save（status: pending）、(2) AIGateway.generate でセマンティック段落分割プロンプト送信 → JSON パース → ContentSegment 群生成 → saveMany → onProgress('segments_created', {total})、(3) status を processing に更新して save、(4) 各セグメントに対して Promise.all で5種チェックを並列実行（ファクトチェック: generateWithWebSearch / ナレッジ整合性: EmbeddingGateway.generateEmbedding → KnowledgeSearchGateway.searchSimilar → AIGateway.generate / 表現ルール: ExpressionRuleProvider.findActiveRules → AIGateway.generate / 炎上リスク: AIGateway.generate / 文章クオリティ: AIGateway.generate）、各チェック開始・完了時に onProgress('check_started'/'check_completed') を送出、(5) CheckResult[] → saveMany、(6) ContentCheck.complete() → save → onProgress('completed', {contentCheckId, summary})、エラー時は ContentCheck.fail() → save → onProgress('error')。src/backend/contexts/content-check/application/usecases/__tests__/execute-content-check.usecase.test.ts に全依存モックのユニットテスト（正常系: 全 Gateway・Repository の呼び出し検証、エラー系: AIGateway 失敗時の ContentCheck.fail() 確認）を追加",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "get-content-check-detail-usecase",
+        "description": "GetContentCheckDetailUseCase の実装。src/backend/contexts/content-check/application/usecases/ に以下を新規作成: (1) content-check-detail.dto.ts: ContentCheckDetailDto 型（plain object: { id, source, status, originalText, createdAt, segments: { id, segmentIndex, text, results: { id, checkType, severity, message, suggestion | null }[] }[], summary: { error: number, warning: number, info: number } }）を定義。(2) get-content-check-detail.usecase.ts: コンストラクタ DI（ContentCheckRepository, ContentSegmentRepository, CheckResultRepository）。execute(id: string): ContentCheck + 全 segments + 各 segment の results を取得・組み立て → ContentCheckDetailDto を返す（ID 存在しない場合は Error を throw）。(3) __tests__/get-content-check-detail.usecase.test.ts: 全 Repository をモック、正常系（DTO の構造・段落/結果の組み立て検証）・存在しない ID でのエラー確認",
+        "wave": 3,
+        "done": false
+      },
+      {
+        "id": "content-check-composition-and-loader",
+        "description": "content-check context の Composition Root と Loader 実装。(1) src/backend/contexts/content-check/presentation/composition/content-check.composition.ts を新規作成: createExecuteContentCheckUseCase()（AnthropicAIGateway + OpenAIEmbeddingGateway + PrismaContentCheckRepository + PrismaContentSegmentRepository + PrismaCheckResultRepository + PrismaExpressionRuleProvider + PrismaKnowledgeSearchGateway を注入）と createGetContentCheckDetailUseCase()（PrismaContentCheckRepository + PrismaContentSegmentRepository + PrismaCheckResultRepository を注入）のファクトリ関数を定義。(2) src/backend/contexts/content-check/presentation/loaders/get-content-check-detail.loader.ts を新規作成: loadContentCheckDetail(id: string): Promise<ContentCheckDetailDto> を createGetContentCheckDetailUseCase 経由で取得して返す",
+        "wave": 4,
+        "done": false
+      },
+      {
+        "id": "execute-content-check-sse",
+        "description": "SSE ストリーミングエンドポイントの実装。src/app/api/checks/execute/route.ts を新規作成（POST API Route）: リクエストボディから originalText・source を取得、ReadableStream を生成し SSEフォーマット（data: ${JSON.stringify(event)}\\n\\n）で onProgress コールバックのイベント（segments_created, check_started, check_completed, completed, error）を書き出す。createExecuteContentCheckUseCase() を content-check.composition.ts から取得して execute() を呼び出す。開発環境（NODE_ENV=development）ではダミーユーザー ID を使用、本番環境では Supabase Auth セッションから userId を取得。レスポンスは Content-Type: text/event-stream, Cache-Control: no-cache で返す",
+        "wave": 5,
+        "done": false
+      },
+      {
+        "id": "checks-new-page-ui",
+        "description": "/checks/new ページの UI 実装。(1) src/components/checks/check-form.tsx を新規作成（'use client'）: shadcn/ui Textarea でテキスト入力（30000字カウンタ表示）、送信ボタン押下で fetch('/api/checks/execute', { method: 'POST', body: JSON.stringify({ originalText, source: 'web' }) }) を呼び出し ReadableStream reader で SSE イベントを consume、segments_created 受信後に段落数を表示、check_started/check_completed 受信でチェック種別（5種）ごとのステータスバッジ（waiting→running→done）をリアルタイム更新、completed 受信後に router.push(`/checks/${contentCheckId}`) でリダイレクト、error 受信時はエラーメッセージ表示。(2) src/app/(app)/checks/new/page.tsx（Server Component）を更新し CheckForm コンポーネントをレンダリング",
+        "wave": 5,
+        "done": false
+      },
+      {
+        "id": "checks-detail-page-ui",
+        "description": "/checks/[id] 詳細ページの UI 実装。(1) src/components/checks/check-result-summary.tsx を新規作成（Server Component）: error/warning/info の件数をバッジ表示するサマリー統計コンポーネント。(2) src/components/checks/check-result-segment.tsx を新規作成（Server Component）: セグメントテキストと そのセグメントの CheckResult 一覧（checkType ラベル・severity バッジ（error=red, warning=yellow, info=blue）・message・suggestion）を表示。(3) src/app/(app)/checks/[id]/page.tsx を更新（Server Component）: loadContentCheckDetail(params.id) で ContentCheckDetailDto を取得し CheckResultSummary と全 CheckResultSegment コンポーネントを表示（ID 不正時は notFound()）。(4) e2e/checks.spec.ts を新規作成: /checks/new でテキスト入力・送信 → SSE 進捗表示（段落数・チェック種別ステータス）→ 完了後 /checks/[id] へリダイレクト → セグメントごとの結果詳細が表示されることを確認する基本 E2E シナリオを追加",
+        "wave": 5,
+        "done": false
+      },
+      {
+        "id": "verify-milestone6",
+        "description": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm exec playwright test を実行し全て成功することを確認。Biome lint エラー・TypeScript 型エラー・ビルドエラー・テスト失敗・E2E テスト失敗があれば全て修正する",
+        "wave": 6,
+        "done": false
+      }
+    ]
   },
   {
     "milestone": 7,
