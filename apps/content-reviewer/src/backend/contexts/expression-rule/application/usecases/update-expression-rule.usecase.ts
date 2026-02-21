@@ -14,6 +14,7 @@ export class UpdateExpressionRuleUseCase {
 
 	async execute(input: UpdateExpressionRuleInput): Promise<ExpressionRule> {
 		const existing = await this.repository.findById(input.id);
+
 		if (!existing) {
 			throw new Error(`ExpressionRule not found: ${input.id}`);
 		}
@@ -29,6 +30,7 @@ export class UpdateExpressionRuleUseCase {
 		}
 
 		await this.repository.save(result.value);
+
 		return result.value;
 	}
 }

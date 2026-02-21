@@ -127,19 +127,19 @@
         "id": "expression-rule-domain-model",
         "description": "src/backend/contexts/expression-rule/domain/models/expression-rule.model.ts に ExpressionRule Rich Domain Model を実装。private constructor + ファクトリメソッド create(ngExpression, recommendedExpression, description?, createdBy) で NG表現・推奨表現の空文字バリデーション。reconstruct() で DB からの復元。update(ngExpression, recommendedExpression, description?) で更新。deactivate()/activate() で有効化/無効化。src/backend/contexts/shared/domain/models/__tests__/expression-rule-id.model.test.ts と src/backend/contexts/expression-rule/domain/models/__tests__/expression-rule.model.test.ts にユニットテスト（create 正常系、バリデーションエラー、update、deactivate/activate）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-repository-impl",
         "description": "src/backend/contexts/expression-rule/infrastructure/repositories/prisma-expression-rule.repository.ts に PrismaExpressionRuleRepository を実装。ExpressionRuleRepository interface を implements し、Prisma ExpressionRule ↔ ドメイン ExpressionRule 変換（toDomain / toPrisma private メソッド）を行う。save（upsert）、findById、findAll、findActive（isActive=true のみ）、delete を実装。prisma-client.ts の共有 PrismaClient を利用",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-usecases",
         "description": "expression-rule context の UseCase 4種を実装。src/backend/contexts/expression-rule/application/usecases/create-expression-rule.usecase.ts（ExpressionRuleRepository を DI、ExpressionRule.create → repository.save）、update-expression-rule.usecase.ts（findById → update → save、存在しない場合は throw）、delete-expression-rule.usecase.ts（findById → repository.delete、存在しない場合は throw）、list-expression-rules.usecase.ts（repository.findAll で一覧取得）。各 UseCase はクラスベース + constructor DI + execute() メソッド",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "expression-rule-usecase-tests",

@@ -6,6 +6,7 @@ export class DeleteExpressionRuleUseCase {
 
 	async execute(id: ExpressionRuleId): Promise<void> {
 		const existing = await this.repository.findById(id);
+
 		if (!existing) {
 			throw new Error(`ExpressionRule not found: ${id}`);
 		}
