@@ -264,19 +264,19 @@
         "id": "note-scraper-gateway-impl",
         "description": "必要に応じて apps/content-reviewer/package.json に RSS/XML パース用パッケージ（fast-xml-parser 等）を追加し pnpm install を実行。src/backend/contexts/knowledge/infrastructure/note-scraper.http-gateway.ts に NoteScraperHttpGateway クラスを実装（NoteScraperGateway interface を implements）。fetchArticleList は https://note.com/{accountName}/rss をフェッチして RSS XML をパースし NoteArticleSummary[] を返す。fetchArticleContent は記事 URL をフェッチして HTML から本文テキストを抽出して返す。src/backend/contexts/knowledge/infrastructure/__tests__/note-scraper.http-gateway.test.ts にユニットテストを追加（fetch をモック）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "fetch-note-article-list-usecase",
         "description": "src/backend/contexts/knowledge/application/usecases/fetch-note-article-list.usecase.ts に FetchNoteArticleListUseCase を実装（クラスベース + NoteScraperGateway コンストラクタ DI + execute(accountName: string): Promise<NoteArticleSummary[]>）。src/backend/contexts/knowledge/application/usecases/__tests__/fetch-note-article-list.usecase.test.ts にユニットテストを追加（NoteScraperGateway をモック、正常系・空リスト）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "import-note-articles-usecase",
         "description": "src/backend/contexts/knowledge/application/usecases/import-note-articles.usecase.ts に ImportNoteArticlesUseCase を実装（NoteScraperGateway + KnowledgeArticleRepository + KnowledgeEmbeddingRepository + EmbeddingGateway をコンストラクタ DI。execute({ selectedUrls: string[], createdBy: UserId }) で各 URL に対して fetchArticleContent → KnowledgeArticle.create(sourceType: 'note') → articleRepository.save → EmbeddingGateway.generateEmbedding → KnowledgeEmbedding.create → embeddingRepository.saveMany を実行）。src/backend/contexts/knowledge/application/usecases/__tests__/import-note-articles.usecase.test.ts にユニットテストを追加（全依存をモック、正常系: fetchArticleContent・save・generateEmbedding・saveMany の呼び出しを検証）",
         "wave": 2,
-        "done": false
+        "done": true
       },
       {
         "id": "note-import-presentation",
