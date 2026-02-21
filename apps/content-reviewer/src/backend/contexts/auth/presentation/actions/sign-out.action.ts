@@ -4,6 +4,10 @@ import { createSignOutUseCase } from '@/backend/contexts/auth/presentation/compo
 import { redirect } from 'next/navigation';
 
 export async function signOutAction(): Promise<never> {
+	if (process.env.NODE_ENV === 'development') {
+		redirect('/login');
+	}
+
 	const useCase = await createSignOutUseCase();
 	await useCase.execute();
 

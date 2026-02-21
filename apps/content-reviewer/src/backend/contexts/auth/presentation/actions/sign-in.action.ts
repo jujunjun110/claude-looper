@@ -4,6 +4,10 @@ import { createSignInUseCase } from '@/backend/contexts/auth/presentation/compos
 import { redirect } from 'next/navigation';
 
 export async function signInAction(): Promise<never> {
+	if (process.env.NODE_ENV === 'development') {
+		redirect('/');
+	}
+
 	const useCase = await createSignInUseCase();
 
 	const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
